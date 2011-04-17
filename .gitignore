@@ -1,0 +1,8 @@
+bin/
+include/
+lib/
+build/
+dist/
+*.pyc
+.*.sw?
+*egg-info
