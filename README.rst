@@ -58,9 +58,8 @@ And then, you can use :
 `STATES.CHOICES` to use with `choices=` in fields declarations
 `STATES.CHOICES_DICT` a dict to get the value to display with the key used in database
 `STATES.CHOICES_RDICT`, a dict to get the key from the displayable value (can be usefull in some case)
-`STATES.__NAME__, default to `CHOICES`, the base key used for `CHOICES`, `CHOICES_DICT` and `CHOICES_RDICT` (can be set as a kwargs to the `Choices` constructor)
 
-To use another name than `CHOICES` :
+To use another name than `CHOICES` :dd a name parameter as a named argument to the constructor
 
     STATES = Choices(
         ('ONLINE',  1, 'Online'),
@@ -90,3 +89,5 @@ And you can add others choices within the same variable :
 
 When `add_choices` is used, the `CHOICES` (here `STATES.OLD_STATES`), and the two dictionnaries are initialized.
 If a constant name (firt entry in a tuple)  is declared more than one time, the first declared value (second entry of a tuple) is used.
+
+Originaly written by Stephane Angel <s.angel@twidi.com> (http://twidi.com) for http://www.liberation.fr
