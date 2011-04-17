@@ -21,7 +21,7 @@ You can install directly from the github_ repo :
 Usage
 -----
 
-The aim is to replace this :
+The aim is to replace this ::
 
     STATE_ONLINE  = 1
     STATE_DRAFT   = 2
@@ -47,7 +47,7 @@ The aim is to replace this :
         def get_related_content(self):
             return self.related_to.select_related().filter(state=STATE_ONLINE)
 
-by this :
+by this ::
 
     from extended_choices import Choices
 
@@ -79,7 +79,7 @@ And then, you can use :
 * `STATES.CHOICES_DICT` a dict to get the value to display with the key used in database
 * `STATES.CHOICES_RDICT`, a dict to get the key from the displayable value (can be usefull in some case)
 
-To use another name than `CHOICES` by passing a `name` parameter as a named argument to the constructor
+To use another name than `CHOICES` by passing a `name` parameter as a named argument to the constructor::
 
     STATES = Choices(
         ('ONLINE',  1, 'Online'),
@@ -92,7 +92,7 @@ To use another name than `CHOICES` by passing a `name` parameter as a named argu
         state = models.PositiveSmallIntegerField(choices=STATES.OUR_STATES, default=STATES.DRAFT)
     # ...
 
-And you can add others choices within the same variable :
+And you can add others choices within the same variable ::
 
     STATES.add_choices('OLD_STATES', (
         ('VISIBLE', 10, 'Visible'),
@@ -116,7 +116,7 @@ You can declarer your choices where you want. My usage is in the models.py file,
 License
 -------
 
-Licensed under the General Public License (GPL). See the `Licence` file included
+Licensed under the General Public License (GPL). See the `License` file included
 
 -----------
 Source code
