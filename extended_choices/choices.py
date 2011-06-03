@@ -14,7 +14,7 @@ class Choices:
      * all named constant (THE_A_1 and THE_A_2)
      * a tuple CHOICES ( (11, u'a_1'), (12, u'a_2') )
      * a dict CHOICES_DICT { 11 => u'a_1', 12 => u'a_2' }
-     * a dict CHOICES_RDICT { u'a_1' => 11, u'a_2' => 12 }
+     * a dict CHOICES_REVERTED { u'a_1' => 11, u'a_2' => 12 }
 
     If you want all these names not to contain "CHOICES" but an other name,
     you can add it to the call :
@@ -26,8 +26,8 @@ class Choices:
         )
 
     This exemple will create all constants (no changes here), and FOO will
-    be used in place of CHOICES, and FOO_DICT and FOO_RDICT in place of
-    CHOICES_DICT and CHOICES_RDICT
+    be used in place of CHOICES, and FOO_DICT and FOO_REVERTED in place of
+    CHOICES_DICT and CHOICES_REVERTED
 
     If you want to create other choices for the same instance, you can
     use the add_choices method
@@ -53,7 +53,7 @@ class Choices:
 
         CHOICES = []
         CHOICES_DICT = {}
-        CHOICES_RDICT = {}
+        REVERTED_CHOICES_DICT = {}
 
         for choice in choices:
             const, value, string = choice
@@ -63,9 +63,9 @@ class Choices:
                 value = getattr(self, const)
             CHOICES.append((value, string))
             CHOICES_DICT[value] = string
-            CHOICES_RDICT[string] = value
+            CHOICES_REVERTED_DICT[string] = value
 
         setattr(self, name, tuple(CHOICES))
         setattr(self, '%s_DICT' % name, CHOICES_DICT)
-        setattr(self, '%s_RDICT' % name, CHOICES_RDICT)
+        setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_CHOICES_DICT)
 
