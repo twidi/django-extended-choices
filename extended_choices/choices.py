@@ -64,9 +64,6 @@ class Choices:
     ...                                 )
     >>> CHOICES_ALIGNEMENT.GOOD
     40
-
-    Last but not least you should be carful while naming your choices ``add_choices`` use is 
-    not recommended as it may trigger name clash.
     """
 
     def __init__(self, *choices, **kwargs):
