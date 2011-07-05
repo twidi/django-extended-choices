@@ -1,8 +1,8 @@
 django-extended-choices
-============================
+=======================
 
 A little application to improve django choices (or whatever: no dependencies)
-------------------------------------------------------
+-----------------------------------------------------------------------------
 
 django-extended-choices aims to provide a better (ie for me), and more readble
 way of using choices_ in django_
@@ -11,7 +11,7 @@ way of using choices_ in django_
 Installation
 ------------
 
-You can install directly from the github_ repo :
+You can install directly from the github_ repo:
 
     $ git clone git://github.com/twidi/django-extended-choices.git
     $ cd django-extended-choices
@@ -21,7 +21,7 @@ You can install directly from the github_ repo :
 Usage
 -----
 
-The aim is to replace this ::
+The aim is to replace this::
 
     STATE_ONLINE  = 1
     STATE_DRAFT   = 2
@@ -69,12 +69,13 @@ by this ::
         def get_related_content(self):
             return self.related_to.select_related().filter(state=STATES.ONLINE)
 
-As you can see, there is only one declaration for all states, with, for each state in order :
+As you can see, there is only one declaration for all states, with, for each state in order:
+
 * the pseudo-constant name which can be used (STATES.ONLINE replace the previous STATE_ONLINE)
 * the value to use as key in database
 * the name to be displayed
 
-And then, you can use :
+And then, you can use:
 
 * `STATES.CHOICES` to use with `choices=` in fields declarations
 * `STATES.CHOICES_DICT` a dict to get the value to display with the key used in database
@@ -93,7 +94,7 @@ To use another name than `CHOICES` by passing a `name` parameter as a named argu
         state = models.PositiveSmallIntegerField(choices=STATES.OUR_STATES, default=STATES.DRAFT)
     # ...
 
-And you can add others choices within the same variable ::
+And you can add others choices within the same variable::
 
     STATES.add_choices('OLD_STATES', (
         ('VISIBLE', 10, 'Visible'),
