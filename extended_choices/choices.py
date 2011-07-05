@@ -2,17 +2,17 @@ class Choices:
     """
     Helper class for choices fields in Django.
 
-    A choice value has three representation (constant name, value and string). So
-    Choices takes list of such tuples.
-    
+    A choice value has three representation (constant name, value and
+    string). So Choices takes list of such tuples.
+
     Here is an example of Choices use:
-    
+
     >>> CHOICES_ALIGNEMENT = Choices(
-    ...                              ('BAD', 10, u'bad'),
-    ...                              ('NEUTRAL', 20, u'neutral'),
-    ...                              ('CHAOTIC_GOOD', 30, u'chaotic good'),
-    ...                              ('GOOD', 40, u'good'),
-    ...                             )
+    ...     ('BAD', 10, u'bad'),
+    ...     ('NEUTRAL', 20, u'neutral'),
+    ...     ('CHAOTIC_GOOD', 30, u'chaotic good'),
+    ...     ('GOOD', 40, u'good'),
+    ... )
     >>> CHOICES_ALIGNEMENT.BAD
     10
     >>> CHOICES_ALIGNEMENT.CHOICES_DICT[30]
@@ -20,27 +20,29 @@ class Choices:
     >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_DICT[u'good']
     40
 
-    As you can see in the above example usage, Choices objects gets three attributes:
-    - one attribute built after constant names provided in the tuple (like BAD, NEUTRAL etc...)
+    As you can see in the above example usage, Choices objects gets three
+    attributes:
+    - one attribute built after constant names provided in the tuple (like BAD,
+      NEUTRAL etc...)
     - a CHOICES_DICT that match value to string
     - a REVERTED_CHOICES_DICT that match string to value
 
-    If you don't like the word CHOICES, you can provide you own nomanclature.
-    
+    If you don't like the word CHOICES, you can provide you own nomenclature.
+
     >>> ALIGNEMENTS = Choices(
-    ...                       ('BAD', 10, u'bad'),
-    ...                       ('NEUTRAL', 20, u'neutral'),
-    ...                       ('CHAOTIC_GOOD', 30, u'chaotic good'),
-    ...                       ('GOOD', 40, u'good'),
-    ...                      name = 'KIND'
-    ...                      )
+    ...     ('BAD', 10, u'bad'),
+    ...     ('NEUTRAL', 20, u'neutral'),
+    ...     ('CHAOTIC_GOOD', 30, u'chaotic good'),
+    ...     ('GOOD', 40, u'good'),
+    ...     name='KIND'
+    ... )
     >>> ALIGNEMENTS.KIND
     ((10, u'bad'), (20, u'neutral'), (30, u'chaotic good'), (40, u'good'))
     >>> ALIGNEMENTS.KIND_DICT[20]
     u'neutral'
     >>> ALIGNEMENTS.REVERTED_KIND_DICT[u'neutral']
     20
-                
+
     If you want to create other choices for the same instance, you can
     use the add_choices method
     This method take a name (to use in place of "CHOICES" in all variable
@@ -57,11 +59,11 @@ class Choices:
     >>> CHOICES_ALIGNEMENT.REVERTED_WESTERN_DICT
     {'chaotic ugly': 60, 'ugly': 50}
 
-    Constants that already exists won't be updated according the the new value:
+    Constants that already exists won't be updated according to the new value:
 
-    >>> CHOICES_ALIGNEMENT.add_choices('GOOD_KIND', 
-    ...                                 ('GOOD', 100, 'good')
-    ...                                 )
+    >>> CHOICES_ALIGNEMENT.add_choices('GOOD_KIND',
+    ...                                ('GOOD', 100, 'good')
+    ...                               )
     >>> CHOICES_ALIGNEMENT.GOOD
     40
     """
