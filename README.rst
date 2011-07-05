@@ -75,9 +75,10 @@ As you can see, there is only one declaration for all states, with, for each sta
 * the name to be displayed
 
 And then, you can use :
+
 * `STATES.CHOICES` to use with `choices=` in fields declarations
 * `STATES.CHOICES_DICT` a dict to get the value to display with the key used in database
-* `STATES.CHOICES_RDICT`, a dict to get the key from the displayable value (can be usefull in some case)
+* `STATES.REVERTED_CHOICES_DICT`, a dict to get the key from the displayable value (can be usefull in some case)
 
 To use another name than `CHOICES` by passing a `name` parameter as a named argument to the constructor::
 
