@@ -1,5 +1,5 @@
-from extended_choices.choices import Choices
+from extended_choices.choices import Choices, NOT_CONSTANTS
 
-__all__ = ['Choices',]
+__all__ = ['Choices', 'NOT_CONSTANTS']
 
-VERSION = (0, 1, 0)
+VERSION = (0, 2, 0)
