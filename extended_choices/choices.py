@@ -1,5 +1,3 @@
-NOT_CONSTANTS = set()
-
 class Choices:
     """
     Helper class for choices fields in Django.
@@ -73,8 +71,6 @@ class Choices:
         self.add_choices(name, *choices)
 
     def add_choices(self, name, *choices):
-        global NOT_CONSTANTS
-
         CHOICES = []
         CHOICES_DICT = {}
         REVERTED_CHOICES_DICT = {}
@@ -90,15 +86,9 @@ class Choices:
             REVERTED_CHOICES_DICT[string] = value
 
         setattr(self, name, tuple(CHOICES))
-        NOT_CONSTANTS.add(name)
         setattr(self, '%s_DICT' % name, CHOICES_DICT)
-        NOT_CONSTANTS.add('%s_DICT' % name)
         setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_CHOICES_DICT)
-        NOT_CONSTANTS.add('REVERTED_%s_DICT' % name)
 
-NOT_CONSTANTS = NOT_CONSTANTS.union(dir(Choices))
-
-                      
 
 if __name__ == '__main__':
     import doctest
