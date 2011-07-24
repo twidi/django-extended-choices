@@ -27,70 +27,77 @@ class Choices:
     - a CHOICES_DICT that match value to string
     - a REVERTED_CHOICES_DICT that match string to value
 
-    If you don't like the word CHOICES, you can provide you own nomenclature.
+    If you want to create subset of choices, you can
+    use the add_subset method
+    This method take a name, and then the constants you want to 
+    have in this subset:
 
-    >>> ALIGNEMENTS = Choices(
-    ...     ('BAD', 10, u'bad'),
-    ...     ('NEUTRAL', 20, u'neutral'),
-    ...     ('CHAOTIC_GOOD', 30, u'chaotic good'),
-    ...     ('GOOD', 40, u'good'),
-    ...     name='KIND'
-    ... )
-    >>> ALIGNEMENTS.KIND
-    ((10, u'bad'), (20, u'neutral'), (30, u'chaotic good'), (40, u'good'))
-    >>> ALIGNEMENTS.KIND_DICT[20]
-    u'neutral'
-    >>> ALIGNEMENTS.REVERTED_KIND_DICT[u'neutral']
-    20
-
-    If you want to create other choices for the same instance, you can
-    use the add_choices method
-    This method take a name (to use in place of "CHOICES" in all variable
-    names), and then all the tuples like in the constructor
-
-    >>> CHOICES_ALIGNEMENT.add_choices('WESTERN',
-    ...                                ('UGLY', 50, 'ugly'),
-    ...                                ('CHAOTIC_UGLY', 60, 'chaotic ugly'),
-    ...                               )
+    >>> CHOICES_ALIGNEMENT.add_subset('WESTERN',('BAD', 'GOOD'))
     >>> CHOICES_ALIGNEMENT.WESTERN
-    ((50, 'ugly'), (60, 'chaotic ugly'))
-    >>> CHOICES_ALIGNEMENT.WESTERN_DICT
-    {50: 'ugly', 60: 'chaotic ugly'}
-    >>> CHOICES_ALIGNEMENT.REVERTED_WESTERN_DICT
-    {'chaotic ugly': 60, 'ugly': 50}
-
-    Constants that already exists won't be updated according to the new value:
-
-    >>> CHOICES_ALIGNEMENT.add_choices('GOOD_KIND',
-    ...                                ('GOOD', 100, 'good')
-    ...                               )
-    >>> CHOICES_ALIGNEMENT.GOOD
-    40
+    ((10, u'bad'), (40, u'good'))
     """
 
     def __init__(self, *choices, **kwargs):
+        self.CHOICES = tuple()
+        self.CHOICES_DICT = {}
+        self.REVERTED_CHOICES_DICT = {}
+        # For retrocompatibility
         name = kwargs.get('name', 'CHOICES')
-        self.add_choices(name, *choices)
+        if name != "CHOICES":
+            self.add_choices(name, *choices)
+        else:
+            self._build_choices(*choices)
 
-    def add_choices(self, name, *choices):
-        CHOICES = []
-        CHOICES_DICT = {}
-        REVERTED_CHOICES_DICT = {}
-
+    def _build_choices(self, *choices):
+        CHOICES = list(self.CHOICES)  # for retrocompatibility 
+                                      # we may have to call _build_choices 
+                                      # more than one time and so append the 
+                                      # new choices to the already existing ones
         for choice in choices:
             const, value, string = choice
-            if not hasattr(self, const):
-                setattr(self, const, value)
-            else:
-                value = getattr(self, const)
+            if hasattr(self, const):
+                raise ValueError(u"You cannot declare two constants "
+                                  "with the same name! %s " % unicode(choice))
+            if value in self.CHOICES_DICT:
+                raise ValueError(u"You cannot declare two constants "
+                                  "with the same value! %s " % unicode(choice))
+            setattr(self, const, value)
             CHOICES.append((value, string))
-            CHOICES_DICT[value] = string
-            REVERTED_CHOICES_DICT[string] = value
+            self.CHOICES_DICT[value] = string
+            self.REVERTED_CHOICES_DICT[string] = value
+        # CHOICES must be a tuple (to be immutable)
+        setattr(self, "CHOICES", tuple(CHOICES))
 
-        setattr(self, name, tuple(CHOICES))
-        setattr(self, '%s_DICT' % name, CHOICES_DICT)
-        setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_CHOICES_DICT)
+    def add_choices(self, name="CHOICES", *choices):
+        self._build_choices(*choices)
+        if name != "CHOICES":
+            # for retrocompatibility 
+            # we make a subset with new choices
+            constants_for_subset = []
+            for choice in choices:
+                const, value, string = choice
+                constants_for_subset.append(const)
+            self.add_subset(name, constants_for_subset)
+    
+    def add_subset(self, name, constants):
+        if hasattr(self, name):
+            raise ValueError(u"Cannot use %s as a subset name."
+                              "It's already used." % name)
+        SUBSET = []
+        SUBSET_DICT = {}  # retrocompatibility
+        REVERTED_SUBSET_DICT = {}  # retrocompatibility
+        for const in constants:
+            value = getattr(self, const)
+            string = self.CHOICES_DICT[value]
+            SUBSET.append((value, string))
+            SUBSET_DICT[value] = string  # retrocompatibility
+            REVERTED_SUBSET_DICT[string] = value  # retrocompatibility
+        # Maybe we should make a @property instead
+        setattr(self, name, tuple(SUBSET))
 
+        # For retrocompatibility
+        setattr(self, '%s_DICT' % name, SUBSET_DICT)
+        setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_SUBSET_DICT)
 
 if __name__ == '__main__':
     import doctest

@@ -10,6 +10,7 @@ MY_CHOICES = Choices(
    ('TWO', 2, u'Two for the show'),
    ('THREE', 3, u'Three to get ready'),
 )
+MY_CHOICES.add_subset("ODD", ("ONE", "THREE"))
 
 class FieldsTests(TestCase):
     """
@@ -29,5 +30,44 @@ class FieldsTests(TestCase):
         # Should not validate with integer
         self.assertRaises(forms.ValidationError, field.clean, 1)
 
-
+class ChoicesTests(TestCase):
+    """
+    Testing the choices
+    """
+    def test_simple_choice(self):
+        self.assertEqual(MY_CHOICES.CHOICES, 
+                         ((1, u"One for the money"),
+                          (2, u"Two for the show"),
+                          (3, u"Three to get ready"),)
+        )
+        self.assertEqual(MY_CHOICES.CHOICES_DICT, 
+                        {1: u'One for the money', 2: u'Two for the show', 3: u'Three to get ready'})
+        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_DICT,
+                         {u'One for the money': 1, u'Three to get ready': 3, u'Two for the show': 2})
+    
+    def test_subset(self):
+        self.assertEqual(MY_CHOICES.ODD, 
+                        ((1, u'One for the money'), (3, u'Three to get ready')))
+    
+    def test_unique_values(self):
+        self.assertRaises(ValueError, Choices, ('TWO', 4, u'Deux'), ('FOUR', 4, u'Quatre'))
+    
+    def test_unique_constants(self):
+        self.assertRaises(ValueError, Choices, ('TWO', 2, u'Deux'), ('TWO', 4, u'Quatre'))
+    
+    def test_retrocompatibility(self):
+        MY_CHOICES = Choices(
+           ('TWO', 2, u'Deux'),
+           ('FOUR', 4, u'Quatre'),
+           name="EVEN"
+        )
+        MY_CHOICES.add_choices("ODD",
+           ('ONE', 1, u'Un'),
+           ('THREE', 3, u'Trois'),
+        )
+        self.assertEqual(MY_CHOICES.CHOICES, 
+                         ((2, u'Deux'), (4, u'Quatre'), (1, u'Un'), (3, u'Trois'))
+        )
+        self.assertEqual(MY_CHOICES.ODD, ((1, u'Un'), (3, u'Trois')))
+        self.assertEqual(MY_CHOICES.EVEN, ((2, u'Deux'), (4, u'Quatre')))
 
