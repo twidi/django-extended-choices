@@ -36,7 +36,7 @@ class Choices:
     >>> CHOICES_ALIGNEMENT.WESTERN
     ((10, u'bad'), (40, u'good'))
     """
-
+    
     def __init__(self, *choices, **kwargs):
         self.CHOICES = tuple()
         self.CHOICES_DICT = {}
@@ -47,7 +47,13 @@ class Choices:
             self.add_choices(name, *choices)
         else:
             self._build_choices(*choices)
-
+    
+    def __contains__(self, item):
+        """
+        Make smarter to check if a value is valid for a Choices.
+        """
+        return item in self.CHOICES_DICT
+    
     def _build_choices(self, *choices):
         CHOICES = list(self.CHOICES)  # for retrocompatibility 
                                       # we may have to call _build_choices 
@@ -67,7 +73,7 @@ class Choices:
             self.REVERTED_CHOICES_DICT[string] = value
         # CHOICES must be a tuple (to be immutable)
         setattr(self, "CHOICES", tuple(CHOICES))
-
+    
     def add_choices(self, name="CHOICES", *choices):
         self._build_choices(*choices)
         if name != "CHOICES":
@@ -82,7 +88,7 @@ class Choices:
     def add_subset(self, name, constants):
         if hasattr(self, name):
             raise ValueError(u"Cannot use %s as a subset name."
-                              "It's already used." % name)
+                              "It's already an attribute." % name)
         SUBSET = []
         SUBSET_DICT = {}  # retrocompatibility
         REVERTED_SUBSET_DICT = {}  # retrocompatibility
