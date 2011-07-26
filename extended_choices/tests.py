@@ -45,8 +45,11 @@ class ChoicesTests(TestCase):
         self.assertEqual(MY_CHOICES.REVERTED_CHOICES_DICT,
                          {u'One for the money': 1, u'Three to get ready': 3, u'Two for the show': 2})
     
-    def test_contains(self):
+    def test__contains__(self):
         self.failUnless(MY_CHOICES.ONE in MY_CHOICES)
+    
+    def test__iter__(self):
+        self.assertEqual([k for k, v in MY_CHOICES], [1, 2, 3])
     
     def test_subset(self):
         self.assertEqual(MY_CHOICES.ODD, 

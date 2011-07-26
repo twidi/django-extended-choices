@@ -54,6 +54,9 @@ class Choices:
         """
         return item in self.CHOICES_DICT
     
+    def __iter__(self):
+        return self.CHOICES.__iter__()
+    
     def _build_choices(self, *choices):
         CHOICES = list(self.CHOICES)  # for retrocompatibility 
                                       # we may have to call _build_choices 
