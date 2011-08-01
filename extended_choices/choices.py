@@ -29,14 +29,14 @@ class Choices:
 
     If you want to create subset of choices, you can
     use the add_subset method
-    This method take a name, and then the constants you want to 
+    This method take a name, and then the constants you want to
     have in this subset:
 
     >>> CHOICES_ALIGNEMENT.add_subset('WESTERN',('BAD', 'GOOD'))
     >>> CHOICES_ALIGNEMENT.WESTERN
     ((10, u'bad'), (40, u'good'))
     """
-    
+
     def __init__(self, *choices, **kwargs):
         self.CHOICES = tuple()
         self.CHOICES_DICT = {}
@@ -47,20 +47,20 @@ class Choices:
             self.add_choices(name, *choices)
         else:
             self._build_choices(*choices)
-    
+
     def __contains__(self, item):
         """
         Make smarter to check if a value is valid for a Choices.
         """
         return item in self.CHOICES_DICT
-    
+
     def __iter__(self):
         return self.CHOICES.__iter__()
-    
+
     def _build_choices(self, *choices):
-        CHOICES = list(self.CHOICES)  # for retrocompatibility 
-                                      # we may have to call _build_choices 
-                                      # more than one time and so append the 
+        CHOICES = list(self.CHOICES)  # for retrocompatibility
+                                      # we may have to call _build_choices
+                                      # more than one time and so append the
                                       # new choices to the already existing ones
         for choice in choices:
             const, value, string = choice
@@ -76,18 +76,18 @@ class Choices:
             self.REVERTED_CHOICES_DICT[string] = value
         # CHOICES must be a tuple (to be immutable)
         setattr(self, "CHOICES", tuple(CHOICES))
-    
+
     def add_choices(self, name="CHOICES", *choices):
         self._build_choices(*choices)
         if name != "CHOICES":
-            # for retrocompatibility 
+            # for retrocompatibility
             # we make a subset with new choices
             constants_for_subset = []
             for choice in choices:
                 const, value, string = choice
                 constants_for_subset.append(const)
             self.add_subset(name, constants_for_subset)
-    
+
     def add_subset(self, name, constants):
         if hasattr(self, name):
             raise ValueError(u"Cannot use %s as a subset name."
