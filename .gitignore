@@ -5,4 +5,5 @@ build/
 dist/
 *.pyc
 .*.sw?
+.sw?
 *egg-info
