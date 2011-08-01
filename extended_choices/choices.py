@@ -19,6 +19,10 @@ class Choices:
     u'chaotic good'
     >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_DICT[u'good']
     40
+    >>> CHOICES_ALIGNEMENT.CHOICES_CONST_DICT['NEUTRAL']
+    20
+    >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_CONST_DICT[20]
+    'NEUTRAL'
 
     As you can see in the above example usage, Choices objects gets three
     attributes:
@@ -26,6 +30,8 @@ class Choices:
       NEUTRAL etc...)
     - a CHOICES_DICT that match value to string
     - a REVERTED_CHOICES_DICT that match string to value
+    - a CHOICES_CONST_DICT that match constant to value
+    - a REVERTED_CHOICES_CONST_DICT that match value to constant
 
     If you want to create subset of choices, you can
     use the add_subset method
@@ -41,6 +47,9 @@ class Choices:
         self.CHOICES = tuple()
         self.CHOICES_DICT = {}
         self.REVERTED_CHOICES_DICT = {}
+        # self.CHOICES_CONST_DICT['const'] is the same as getattr(self, 'const')
+        self.CHOICES_CONST_DICT = {}
+        self.REVERTED_CHOICES_CONST_DICT = {}
         # For retrocompatibility
         name = kwargs.get('name', 'CHOICES')
         if name != "CHOICES":
@@ -74,6 +83,8 @@ class Choices:
             CHOICES.append((value, string))
             self.CHOICES_DICT[value] = string
             self.REVERTED_CHOICES_DICT[string] = value
+            self.CHOICES_CONST_DICT[const] = value
+            self.REVERTED_CHOICES_CONST_DICT[value] = const
         # CHOICES must be a tuple (to be immutable)
         setattr(self, "CHOICES", tuple(CHOICES))
 
@@ -95,18 +106,24 @@ class Choices:
         SUBSET = []
         SUBSET_DICT = {}  # retrocompatibility
         REVERTED_SUBSET_DICT = {}  # retrocompatibility
+        SUBSET_CONST_DICT = {}
+        REVERTED_SUBSET_CONST_DICT = {}
         for const in constants:
             value = getattr(self, const)
             string = self.CHOICES_DICT[value]
             SUBSET.append((value, string))
             SUBSET_DICT[value] = string  # retrocompatibility
             REVERTED_SUBSET_DICT[string] = value  # retrocompatibility
+            SUBSET_CONST_DICT[const] = value
+            REVERTED_SUBSET_CONST_DICT[value] = const
         # Maybe we should make a @property instead
         setattr(self, name, tuple(SUBSET))
 
         # For retrocompatibility
         setattr(self, '%s_DICT' % name, SUBSET_DICT)
         setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_SUBSET_DICT)
+        setattr(self, '%s_CONST_DICT' % name, SUBSET_CONST_DICT)
+        setattr(self, 'REVERTED_%s_CONST_DICT' % name, REVERTED_SUBSET_CONST_DICT)
 
 if __name__ == '__main__':
     import doctest

@@ -44,6 +44,10 @@ class ChoicesTests(TestCase):
                         {1: u'One for the money', 2: u'Two for the show', 3: u'Three to get ready'})
         self.assertEqual(MY_CHOICES.REVERTED_CHOICES_DICT,
                          {u'One for the money': 1, u'Three to get ready': 3, u'Two for the show': 2})
+        self.assertEqual(MY_CHOICES.CHOICES_CONST_DICT,
+                         {'ONE': 1, 'TWO': 2, 'THREE': 3})
+        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_CONST_DICT,
+                         {1: 'ONE', 2: 'TWO', 3: 'THREE'})
 
     def test__contains__(self):
         self.failUnless(MY_CHOICES.ONE in MY_CHOICES)
@@ -54,6 +58,8 @@ class ChoicesTests(TestCase):
     def test_subset(self):
         self.assertEqual(MY_CHOICES.ODD,
                         ((1, u'One for the money'), (3, u'Three to get ready')))
+        self.assertEqual(MY_CHOICES.ODD_CONST_DICT,
+                         {'ONE': 1, 'THREE': 3})
 
     def test_unique_values(self):
         self.assertRaises(ValueError, Choices, ('TWO', 4, u'Deux'), ('FOUR', 4, u'Quatre'))
