@@ -13,6 +13,8 @@ Installation
 
 You can install directly from the github_ repo:
 
+::
+
     $ git clone git://github.com/twidi/django-extended-choices.git
     $ cd django-extended-choices
     $ sudo python setup.py install
