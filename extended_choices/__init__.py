@@ -1,5 +1,5 @@
 from extended_choices.choices import Choices
-
+import pkg_resources
 __all__ = ['Choices']
 
-VERSION = (0, 2, 1)
+__version__ = pkg_resources.get_distribution('django-extended-choices').version
