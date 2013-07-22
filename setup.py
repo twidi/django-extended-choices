@@ -20,7 +20,7 @@ setup(
     "(for fields)",
     long_description=readme,
     url="https://github.com/twidi/django-extended-choices",
-    author="Stephane Angel",
+    author='Stephane "Twidi" Angel',
     author_email="s.angel@twidi.com",
     packages=find_packages(),
     include_package_data=True,

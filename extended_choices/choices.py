@@ -24,7 +24,7 @@ class Choices:
     >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_CONST_DICT[20]
     'NEUTRAL'
 
-    As you can see in the above example usage, Choices objects gets three
+    As you can see in the above example usage, Choices objects gets five
     attributes:
     - one attribute built after constant names provided in the tuple (like BAD,
       NEUTRAL etc...)
