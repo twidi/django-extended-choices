@@ -1,71 +1,130 @@
 class Choices:
     """
-    Helper to easily create objects for use with the "choices" parameter
-    for models fields.
+    Helper class for choices fields in Django.
 
-    Default call exemple, with n tuples(constant name, value, string)
+    A choice value has three representation (constant name, value and
+    string). So Choices takes list of such tuples.
 
-        CHOICES_A = Choices(
-            ('THE_A_1', 11, u'a_1'),
-            ('THE_A_2', 12, u'a_2'),
-        )
+    Here is an example of Choices use:
 
-    Default call create, for CHOICES_A :
-     * all named constant (THE_A_1 and THE_A_2)
-     * a tuple CHOICES ( (11, u'a_1'), (12, u'a_2') )
-     * a dict CHOICES_DICT { 11 => u'a_1', 12 => u'a_2' }
-     * a dict CHOICES_RDICT { u'a_1' => 11, u'a_2' => 12 }
+    >>> CHOICES_ALIGNEMENT = Choices(
+    ...     ('BAD', 10, u'bad'),
+    ...     ('NEUTRAL', 20, u'neutral'),
+    ...     ('CHAOTIC_GOOD', 30, u'chaotic good'),
+    ...     ('GOOD', 40, u'good'),
+    ... )
+    >>> CHOICES_ALIGNEMENT.BAD
+    10
+    >>> CHOICES_ALIGNEMENT.CHOICES_DICT[30]
+    u'chaotic good'
+    >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_DICT[u'good']
+    40
+    >>> CHOICES_ALIGNEMENT.CHOICES_CONST_DICT['NEUTRAL']
+    20
+    >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_CONST_DICT[20]
+    'NEUTRAL'
 
-    If you want all these names not to contain "CHOICES" but an other name,
-    you can add it to the call :
+    As you can see in the above example usage, Choices objects gets five
+    attributes:
+    - one attribute built after constant names provided in the tuple (like BAD,
+      NEUTRAL etc...)
+    - a CHOICES_DICT that match value to string
+    - a REVERTED_CHOICES_DICT that match string to value
+    - a CHOICES_CONST_DICT that match constant to value
+    - a REVERTED_CHOICES_CONST_DICT that match value to constant
 
-        CHOICES_A = Choices(
-            ('THE_A_1', 11, u'a_1'),
-            ('THE_A_2', 12, u'a_2'),
-            name = 'FOO'
-        )
+    If you want to create subset of choices, you can
+    use the add_subset method
+    This method take a name, and then the constants you want to
+    have in this subset:
 
-    This exemple will create all constants (no changes here), and FOO will
-    be used in place of CHOICES, and FOO_DICT and FOO_RDICT in place of
-    CHOICES_DICT and CHOICES_RDICT
-
-    If you want to create other choices for the same instance, you can
-    use the add_choices method
-    This method take a name (to use in place of "CHOICES" in all variable
-    names), and then all the tuples like in the constructor
-
-        CHOICES_A.add_choices('BAR',
-            ('THE_A_1', 11, 'a_1_bis'),
-            ('THE_A_2', 13, 'a_3'),
-        )
-
-    This exemple will create all constants (except for those which already
-    exists : we don't create them and ignore the value as we get the one for
-    the existed constant), here just THE_A_2,  and add BAR, BAR_DICT and
-    REVERTED_BAR_DICT
+    >>> CHOICES_ALIGNEMENT.add_subset('WESTERN',('BAD', 'GOOD'))
+    >>> CHOICES_ALIGNEMENT.WESTERN
+    ((10, u'bad'), (40, u'good'))
     """
 
     def __init__(self, *choices, **kwargs):
+        self.CHOICES = tuple()
+        self.CHOICES_DICT = {}
+        self.REVERTED_CHOICES_DICT = {}
+        # self.CHOICES_CONST_DICT['const'] is the same as getattr(self, 'const')
+        self.CHOICES_CONST_DICT = {}
+        self.REVERTED_CHOICES_CONST_DICT = {}
+        # For retrocompatibility
         name = kwargs.get('name', 'CHOICES')
-        self.add_choices(name, *choices)
+        if name != "CHOICES":
+            self.add_choices(name, *choices)
+        else:
+            self._build_choices(*choices)
 
-    def add_choices(self, name, *choices):
+    def __contains__(self, item):
+        """
+        Make smarter to check if a value is valid for a Choices.
+        """
+        return item in self.CHOICES_DICT
 
-        CHOICES = []
-        CHOICES_DICT = {}
-        CHOICES_RDICT = {}
+    def __iter__(self):
+        return self.CHOICES.__iter__()
 
+    def _build_choices(self, *choices):
+        CHOICES = list(self.CHOICES)  # for retrocompatibility
+                                      # we may have to call _build_choices
+                                      # more than one time and so append the
+                                      # new choices to the already existing ones
         for choice in choices:
             const, value, string = choice
-            if not hasattr(self, const):
-                setattr(self, const, value)
-            else:
-                value = getattr(self, const)
+            if hasattr(self, const):
+                raise ValueError(u"You cannot declare two constants "
+                                  "with the same name! %s " % unicode(choice))
+            if value in self.CHOICES_DICT:
+                raise ValueError(u"You cannot declare two constants "
+                                  "with the same value! %s " % unicode(choice))
+            setattr(self, const, value)
             CHOICES.append((value, string))
-            CHOICES_DICT[value] = string
-            CHOICES_RDICT[string] = value
+            self.CHOICES_DICT[value] = string
+            self.REVERTED_CHOICES_DICT[string] = value
+            self.CHOICES_CONST_DICT[const] = value
+            self.REVERTED_CHOICES_CONST_DICT[value] = const
+        # CHOICES must be a tuple (to be immutable)
+        setattr(self, "CHOICES", tuple(CHOICES))
 
-        setattr(self, name, tuple(CHOICES))
-        setattr(self, '%s_DICT' % name, CHOICES_DICT)
-        setattr(self, '%s_RDICT' % name, CHOICES_RDICT)
+    def add_choices(self, name="CHOICES", *choices):
+        self._build_choices(*choices)
+        if name != "CHOICES":
+            # for retrocompatibility
+            # we make a subset with new choices
+            constants_for_subset = []
+            for choice in choices:
+                const, value, string = choice
+                constants_for_subset.append(const)
+            self.add_subset(name, constants_for_subset)
 
+    def add_subset(self, name, constants):
+        if hasattr(self, name):
+            raise ValueError(u"Cannot use %s as a subset name."
+                              "It's already an attribute." % name)
+        SUBSET = []
+        SUBSET_DICT = {}  # retrocompatibility
+        REVERTED_SUBSET_DICT = {}  # retrocompatibility
+        SUBSET_CONST_DICT = {}
+        REVERTED_SUBSET_CONST_DICT = {}
+        for const in constants:
+            value = getattr(self, const)
+            string = self.CHOICES_DICT[value]
+            SUBSET.append((value, string))
+            SUBSET_DICT[value] = string  # retrocompatibility
+            REVERTED_SUBSET_DICT[string] = value  # retrocompatibility
+            SUBSET_CONST_DICT[const] = value
+            REVERTED_SUBSET_CONST_DICT[value] = const
+        # Maybe we should make a @property instead
+        setattr(self, name, tuple(SUBSET))
+
+        # For retrocompatibility
+        setattr(self, '%s_DICT' % name, SUBSET_DICT)
+        setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_SUBSET_DICT)
+        setattr(self, '%s_CONST_DICT' % name, SUBSET_CONST_DICT)
+        setattr(self, 'REVERTED_%s_CONST_DICT' % name, REVERTED_SUBSET_CONST_DICT)
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
