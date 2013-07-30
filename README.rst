@@ -21,10 +21,6 @@ Or from the github_ repository (`master` branch by default)::
     $ cd django-extended-choices
     $ sudo python setup.py install
 
-And add this line to the `INSTALLED_APPS` list in your `settings.py`:
-
-  'extended_choices',
-
 -----
 Usage
 -----
