@@ -145,3 +145,9 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 .. _choices: http://docs.djangoproject.com/en/1.5/ref/models/fields/#choices
 .. _django: http://www.djangoproject.com/
 .. _github: https://github.com/twidi/django-extended-choices
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/twidi/django-extended-choices/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
