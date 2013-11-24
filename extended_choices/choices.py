@@ -33,6 +33,13 @@ class Choices:
     - a CHOICES_CONST_DICT that match constant to value
     - a REVERTED_CHOICES_CONST_DICT that match value to constant
 
+    You can also check membership of choices directly:
+
+    >>> 10 in CHOICES_ALIGNEMENT
+    True
+    >>> 11 in CHOICES_ALIGNEMENT
+    False
+
     If you want to create subset of choices, you can
     use the add_subset method
     This method take a name, and then the constants you want to
@@ -41,6 +48,10 @@ class Choices:
     >>> CHOICES_ALIGNEMENT.add_subset('WESTERN',('BAD', 'GOOD'))
     >>> CHOICES_ALIGNEMENT.WESTERN
     ((10, u'bad'), (40, u'good'))
+    >>> CHOICES_ALIGNEMENT.BAD in CHOICES_ALIGNEMENT.WESTERN_DICT
+    True
+    >>> CHOICES_ALIGNEMENT.REVERTED_WESTERN_DICT[u'bad']
+    10
     """
 
     def __init__(self, *choices, **kwargs):
