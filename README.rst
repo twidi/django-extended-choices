@@ -73,8 +73,8 @@ by this ::
 As you can see there is only one declaration for all states with, for each state, in order:
 
 * the pseudo-constant name which can be used (`STATES.ONLINE` replaces the previous `STATE_ONLINE`)
-* the value to use as key in database
-* the name to be displayed
+* the value to use as key in database - which could equally be a string
+* the name to be displayed - and you can wrap the text in `ugettext_lazy()` if you need i18n
 
 And then, you can use:
 
@@ -95,7 +95,7 @@ You can create subsets of choices within the sane variable::
         ('OFFLINE', 3, 'Offline'),
     )
 
-    STATES.add_subset('NOT_ONLINE', ('DRAFT', 'OFFILNE',))
+    STATES.add_subset('NOT_ONLINE', ('DRAFT', 'OFFLINE',))
 
 Now, `STATES.NOT_ONLINE` is a full `Choices` object, with a subset of the main STATES choices.
 You can use it in a filter::
