@@ -25,7 +25,7 @@ class FieldsTests(unittest.TestCase):
     """
     def test_named_extended_choice_form_field(self):
         """
-        Should return accept only string, and should return the integer value.
+        Should accept only string, and should return the integer value.
         """
         field = NamedExtendedChoiceFormField(choices=MY_CHOICES)
         # Should work with lowercase
@@ -42,6 +42,17 @@ class ChoicesTests(unittest.TestCase):
     """
     Testing the choices
     """
+    def test_attributes_and_keys(self):
+        self.assertEqual(MY_CHOICES.ONE, MY_CHOICES['ONE'])
+        with self.assertRaises(AttributeError):
+            MY_CHOICES.FORTY_TWO
+        with self.assertRaises(KeyError):
+            MY_CHOICES['FORTY_TWO']
+
+        # should work for all attributes
+        self.assertEqual(MY_CHOICES.CHOICES, MY_CHOICES['CHOICES'])
+
+
     def test_simple_choice(self):
         self.assertEqual(MY_CHOICES.CHOICES,
                          ((1, u"One for the money"),

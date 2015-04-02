@@ -66,6 +66,11 @@ class Choices:
     def __iter__(self):
         return self.CHOICES.__iter__()
 
+    def __getitem__(self, key):
+        if not hasattr(self, key):
+            raise KeyError("Key Error : '" + str(key) + "' not found")
+        return getattr(self, key)
+
     def _build_choices(self, *choices):
         CHOICES = list(self.CHOICES)  # for retrocompatibility
                                       # we may have to call _build_choices

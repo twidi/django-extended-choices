@@ -88,6 +88,8 @@ And then, you can use:
 * `STATES.CHOICES_CONST_DICT`, a dict to get value from constant name
 * `STTES.REVERTED_CHOICES_CONST_DICT`, a dict to get constant name from value
 
+Note that each of these attribute can be accessed via a dict key (`STATES['ONLINE']` for example) if
+ you want to fight your IDE that may warn you about undefined attributes.
 
 You can create subsets of choices within the sane variable::
 
