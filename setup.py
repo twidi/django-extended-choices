@@ -1,6 +1,8 @@
 from os.path import abspath, dirname, join
 from setuptools import setup, find_packages
 
+from extended_choices import __version__
+
 
 def read_relative_file(filename):
     """Returns contents of the given file, which path is supposed relative
@@ -9,16 +11,13 @@ def read_relative_file(filename):
         return f.read()
 
 
-version = read_relative_file('VERSION').strip()
-readme = read_relative_file('README.rst')
-
 setup(
     name="django-extended-choices",
-    version=version,
+    version=__version__,
     license="GPL",
     description="Little helper application to improve django choices"
     "(for fields)",
-    long_description=readme,
+    long_description=read_relative_file('README.rst'),
     url="https://github.com/twidi/django-extended-choices",
     author='Stephane "Twidi" Angel',
     author_email="s.angel@twidi.com",

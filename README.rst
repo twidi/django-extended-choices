@@ -136,6 +136,14 @@ Source code
 
 The source code is available on github_
 
+-----
+Tests
+-----
+
+To run tests from the code source, create a virtualenv or activate one, install django, then::
+
+    python -m extended_choices.tests
+
 
 ------
 Author

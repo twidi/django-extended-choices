@@ -7,3 +7,5 @@ dist/
 .*.sw?
 .sw?
 *egg-info
+# pycharm project directory
+.idea

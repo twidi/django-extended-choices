@@ -1,5 +1,10 @@
-from extended_choices.choices import Choices
-import pkg_resources
-__all__ = ['Choices']
+"""Little helper application to improve django choices (for fields)"""
 
-__version__ = pkg_resources.get_distribution('django-extended-choices').version
+from .choices import Choices
+
+VERSION = (0, 3, 0)
+
+__author__ = 'Stephane "Twidi" Ange;'
+__contact__ = "s.angel@twidi.com"
+__homepage__ = "https://pypi.python.org/pypi/django-extended-choices"
+__version__ = ".".join(map(str, VERSION))

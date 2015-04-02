@@ -1,9 +1,15 @@
-# -*- coding: utf-8 -*-
-from django.test import TestCase
+#!/usr/bin/env python
+
+import sys
+if sys.version_info >= (2, 7):
+    import unittest
+else:
+    import unittest2 as unittest
+
 from django import forms
 
-from extended_choices.choices import Choices
-from extended_choices.fields import NamedExtendedChoiceFormField
+from .choices import Choices
+from .fields import NamedExtendedChoiceFormField
 
 MY_CHOICES = Choices(
    ('ONE', 1, u'One for the money'),
@@ -12,7 +18,8 @@ MY_CHOICES = Choices(
 )
 MY_CHOICES.add_subset("ODD", ("ONE", "THREE"))
 
-class FieldsTests(TestCase):
+
+class FieldsTests(unittest.TestCase):
     """
     Testing the fields
     """
@@ -30,7 +37,8 @@ class FieldsTests(TestCase):
         # Should not validate with integer
         self.assertRaises(forms.ValidationError, field.clean, 1)
 
-class ChoicesTests(TestCase):
+
+class ChoicesTests(unittest.TestCase):
     """
     Testing the choices
     """
@@ -83,3 +91,6 @@ class ChoicesTests(TestCase):
         self.assertEqual(MY_CHOICES.ODD, ((1, u'Un'), (3, u'Trois')))
         self.assertEqual(MY_CHOICES.EVEN, ((2, u'Deux'), (4, u'Quatre')))
 
+if __name__ == "__main__":
+
+    unittest.main()
