@@ -1,4 +1,10 @@
-class Choices:
+from __future__ import unicode_literals
+
+from builtins import str
+from builtins import object
+
+
+class Choices(object):
     """
     Helper class for choices fields in Django.
 
@@ -8,16 +14,16 @@ class Choices:
     Here is an example of Choices use:
 
     >>> CHOICES_ALIGNEMENT = Choices(
-    ...     ('BAD', 10, u'bad'),
-    ...     ('NEUTRAL', 20, u'neutral'),
-    ...     ('CHAOTIC_GOOD', 30, u'chaotic good'),
-    ...     ('GOOD', 40, u'good'),
+    ...     ('BAD', 10, 'bad'),
+    ...     ('NEUTRAL', 20, 'neutral'),
+    ...     ('CHAOTIC_GOOD', 30, 'chaotic good'),
+    ...     ('GOOD', 40, 'good'),
     ... )
     >>> CHOICES_ALIGNEMENT.BAD
     10
     >>> CHOICES_ALIGNEMENT.CHOICES_DICT[30]
-    u'chaotic good'
-    >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_DICT[u'good']
+    'chaotic good'
+    >>> CHOICES_ALIGNEMENT.REVERTED_CHOICES_DICT['good']
     40
     >>> CHOICES_ALIGNEMENT.CHOICES_CONST_DICT['NEUTRAL']
     20
@@ -47,10 +53,10 @@ class Choices:
 
     >>> CHOICES_ALIGNEMENT.add_subset('WESTERN',('BAD', 'GOOD'))
     >>> CHOICES_ALIGNEMENT.WESTERN
-    ((10, u'bad'), (40, u'good'))
+    ((10, 'bad'), (40, 'good'))
     >>> CHOICES_ALIGNEMENT.BAD in CHOICES_ALIGNEMENT.WESTERN_DICT
     True
-    >>> CHOICES_ALIGNEMENT.REVERTED_WESTERN_DICT[u'bad']
+    >>> CHOICES_ALIGNEMENT.REVERTED_WESTERN_DICT['bad']
     10
     """
 
@@ -93,11 +99,11 @@ class Choices:
         for choice in choices:
             const, value, string = choice
             if hasattr(self, const):
-                raise ValueError(u"You cannot declare two constants "
-                                  "with the same name! %s " % unicode(choice))
+                raise ValueError("You cannot declare two constants "
+                                 "with the same name! %s " % str(choice))
             if value in self.CHOICES_DICT:
-                raise ValueError(u"You cannot declare two constants "
-                                  "with the same value! %s " % unicode(choice))
+                raise ValueError("You cannot declare two constants "
+                                 "with the same value! %s " % str(choice))
             setattr(self, const, value)
             CHOICES.append((value, string))
             self.CHOICES_DICT[value] = string
@@ -120,8 +126,8 @@ class Choices:
 
     def add_subset(self, name, constants):
         if hasattr(self, name):
-            raise ValueError(u"Cannot use %s as a subset name."
-                              "It's already an attribute." % name)
+            raise ValueError("Cannot use %s as a subset name."
+                             "It's already an attribute." % name)
         SUBSET = []
         SUBSET_DICT = self.dict_class()  # retrocompatibility
         REVERTED_SUBSET_DICT = self.dict_class()  # retrocompatibility
