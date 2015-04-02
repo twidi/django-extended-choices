@@ -1,3 +1,5 @@
+|PyPI Version| |Build Status|
+
 django-extended-choices
 =======================
 
@@ -192,6 +194,10 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 .. _github: https://github.com/twidi/django-extended-choices
 .. _django matrix: https://docs.djangoproject.com/en/1.8/faq/install/#what-python-version-can-i-use-with-django
 
+.. |PyPI Version| image:: https://pypip.in/v/django-extended-choices/badge.png
+   :target: https://pypi.python.org/pypi/django-extended-choices
+.. |Build Status| image:: https://travis-ci.org/twidi/django-extended-choices.png
+   :target: https://travis-ci.org/twidi/django-extended-choices
 
 .. image:: https://d2weczhvl823v0.cloudfront.net/twidi/django-extended-choices/trend.png
    :alt: Bitdeli badge
