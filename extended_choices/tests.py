@@ -117,6 +117,35 @@ class ChoicesTests(unittest.TestCase):
         self.assertEqual(OTHER_CHOICES.ODD, ((1, u'Un'), (3, u'Trois')))
         self.assertEqual(OTHER_CHOICES.EVEN, ((2, u'Deux'), (4, u'Quatre')))
 
+    def test_dict_class(self):
+        if sys.version_info >= (2, 7):
+            from collections import OrderedDict
+        else:
+            from django.utils.datastructures import SortedDict as OrderedDit
+
+        OTHER_CHOICES = Choices(
+            ('ONE', 1, u'One for the money'),
+            ('TWO', 2, u'Two for the show'),
+            ('THREE', 3, u'Three to get ready'),
+            dict_class = OrderedDict
+        )
+        OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
+
+        for attr in (
+                # normal choice
+                'CHOICES_DICT',
+                'REVERTED_CHOICES_DICT',
+                'CHOICES_CONST_DICT',
+                'REVERTED_CHOICES_CONST_DICT',
+                # subset
+                'ODD_DICT',
+                'REVERTED_ODD_DICT',
+                'ODD_CONST_DICT',
+                'REVERTED_ODD_CONST_DICT',
+            ):
+            self.assertFalse(isinstance(getattr(MY_CHOICES, attr), OrderedDict))
+            self.assertTrue(isinstance(getattr(OTHER_CHOICES, attr), OrderedDict))
+
 
 if __name__ == "__main__":
     unittest.main()

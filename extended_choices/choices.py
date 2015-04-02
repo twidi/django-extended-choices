@@ -44,12 +44,15 @@ class Choices:
     """
 
     def __init__(self, *choices, **kwargs):
+        # allow usage of collections.OrdereDdict for example
+        self.dict_class = kwargs.get('dict_class', dict)
+
         self.CHOICES = tuple()
-        self.CHOICES_DICT = {}
-        self.REVERTED_CHOICES_DICT = {}
+        self.CHOICES_DICT = self.dict_class()
+        self.REVERTED_CHOICES_DICT = self.dict_class()
         # self.CHOICES_CONST_DICT['const'] is the same as getattr(self, 'const')
-        self.CHOICES_CONST_DICT = {}
-        self.REVERTED_CHOICES_CONST_DICT = {}
+        self.CHOICES_CONST_DICT = self.dict_class()
+        self.REVERTED_CHOICES_CONST_DICT = self.dict_class()
         # For retrocompatibility
         name = kwargs.get('name', 'CHOICES')
         if name != "CHOICES":
@@ -109,10 +112,10 @@ class Choices:
             raise ValueError(u"Cannot use %s as a subset name."
                               "It's already an attribute." % name)
         SUBSET = []
-        SUBSET_DICT = {}  # retrocompatibility
-        REVERTED_SUBSET_DICT = {}  # retrocompatibility
-        SUBSET_CONST_DICT = {}
-        REVERTED_SUBSET_CONST_DICT = {}
+        SUBSET_DICT = self.dict_class()  # retrocompatibility
+        REVERTED_SUBSET_DICT = self.dict_class()  # retrocompatibility
+        SUBSET_CONST_DICT = self.dict_class()
+        REVERTED_SUBSET_CONST_DICT = self.dict_class()
         for const in constants:
             value = getattr(self, const)
             string = self.CHOICES_DICT[value]

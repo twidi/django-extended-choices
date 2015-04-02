@@ -106,6 +106,16 @@ You can use it in a filter::
 
 `not in` ? Yes, you can use `in` and even iterate on Choices objects !
 
+If you want dicts to be ordered, you can pass the dict class to use to the `Choices` constructor::
+
+    from collections import OrderedDict
+    STATES = Choices(
+        ('ONLINE',  1, 'Online'),
+        ('DRAFT',   2, 'Draft'),
+        ('OFFLINE', 3, 'Offline'),
+        dict_class = OrderedDict
+    )
+
 -----
 Notes
 -----
