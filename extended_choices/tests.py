@@ -12,9 +12,9 @@ from .choices import Choices
 from .fields import NamedExtendedChoiceFormField
 
 MY_CHOICES = Choices(
-   ('ONE', 1, u'One for the money'),
-   ('TWO', 2, u'Two for the show'),
-   ('THREE', 3, u'Three to get ready'),
+    ('ONE', 1, u'One for the money'),
+    ('TWO', 2, u'Two for the show'),
+    ('THREE', 3, u'Three to get ready'),
 )
 MY_CHOICES.add_subset("ODD", ("ONE", "THREE"))
 
@@ -52,21 +52,32 @@ class ChoicesTests(unittest.TestCase):
         # should work for all attributes
         self.assertEqual(MY_CHOICES.CHOICES, MY_CHOICES['CHOICES'])
 
-
     def test_simple_choice(self):
-        self.assertEqual(MY_CHOICES.CHOICES,
-                         ((1, u"One for the money"),
-                          (2, u"Two for the show"),
-                          (3, u"Three to get ready"),)
-        )
-        self.assertEqual(MY_CHOICES.CHOICES_DICT,
-                        {1: u'One for the money', 2: u'Two for the show', 3: u'Three to get ready'})
-        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_DICT,
-                         {u'One for the money': 1, u'Three to get ready': 3, u'Two for the show': 2})
-        self.assertEqual(MY_CHOICES.CHOICES_CONST_DICT,
-                         {'ONE': 1, 'TWO': 2, 'THREE': 3})
-        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_CONST_DICT,
-                         {1: 'ONE', 2: 'TWO', 3: 'THREE'})
+        self.assertEqual(MY_CHOICES.CHOICES,(
+            (1, u"One for the money"),
+            (2, u"Two for the show"),
+            (3, u"Three to get ready"),
+        ))
+        self.assertEqual(MY_CHOICES.CHOICES_DICT, {
+            1: u'One for the money',
+            2: u'Two for the show',
+            3: u'Three to get ready'
+        })
+        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_DICT,{
+            u'One for the money': 1,
+            u'Three to get ready': 3,
+            u'Two for the show': 2
+        })
+        self.assertEqual(MY_CHOICES.CHOICES_CONST_DICT,{
+            'ONE': 1,
+            'TWO': 2,
+            'THREE': 3
+        })
+        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_CONST_DICT, {
+            1: 'ONE',
+            2: 'TWO',
+            3: 'THREE'
+        })
 
     def test__contains__(self):
         self.failUnless(MY_CHOICES.ONE in MY_CHOICES)
@@ -75,10 +86,11 @@ class ChoicesTests(unittest.TestCase):
         self.assertEqual([k for k, v in MY_CHOICES], [1, 2, 3])
 
     def test_subset(self):
-        self.assertEqual(MY_CHOICES.ODD,
-                        ((1, u'One for the money'), (3, u'Three to get ready')))
-        self.assertEqual(MY_CHOICES.ODD_CONST_DICT,
-                         {'ONE': 1, 'THREE': 3})
+        self.assertEqual(MY_CHOICES.ODD,(
+            (1, u'One for the money'),
+            (3, u'Three to get ready')
+        ))
+        self.assertEqual(MY_CHOICES.ODD_CONST_DICT,{'ONE': 1, 'THREE': 3})
 
     def test_unique_values(self):
         self.assertRaises(ValueError, Choices, ('TWO', 4, u'Deux'), ('FOUR', 4, u'Quatre'))
@@ -87,21 +99,24 @@ class ChoicesTests(unittest.TestCase):
         self.assertRaises(ValueError, Choices, ('TWO', 2, u'Deux'), ('TWO', 4, u'Quatre'))
 
     def test_retrocompatibility(self):
-        MY_CHOICES = Choices(
-           ('TWO', 2, u'Deux'),
-           ('FOUR', 4, u'Quatre'),
-           name="EVEN"
+        OTHER_CHOICES = Choices(
+            ('TWO', 2, u'Deux'),
+            ('FOUR', 4, u'Quatre'),
+            name="EVEN"
         )
-        MY_CHOICES.add_choices("ODD",
-           ('ONE', 1, u'Un'),
-           ('THREE', 3, u'Trois'),
+        OTHER_CHOICES.add_choices("ODD",
+            ('ONE', 1, u'Un'),
+            ('THREE', 3, u'Trois'),
         )
-        self.assertEqual(MY_CHOICES.CHOICES,
-                         ((2, u'Deux'), (4, u'Quatre'), (1, u'Un'), (3, u'Trois'))
-        )
-        self.assertEqual(MY_CHOICES.ODD, ((1, u'Un'), (3, u'Trois')))
-        self.assertEqual(MY_CHOICES.EVEN, ((2, u'Deux'), (4, u'Quatre')))
+        self.assertEqual(OTHER_CHOICES.CHOICES, (
+            (2, u'Deux'),
+            (4, u'Quatre'),
+            (1, u'Un'),
+            (3, u'Trois')
+        ))
+        self.assertEqual(OTHER_CHOICES.ODD, ((1, u'Un'), (3, u'Trois')))
+        self.assertEqual(OTHER_CHOICES.EVEN, ((2, u'Deux'), (4, u'Quatre')))
+
 
 if __name__ == "__main__":
-
     unittest.main()

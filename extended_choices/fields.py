@@ -1,23 +1,19 @@
-# -*- coding: utf-8 -*-
-
 from django import forms
-from extended_choices import Choices
+
+from . import Choices
 
 class NamedExtendedChoiceFormField(forms.Field):
     """
     Special fields, where the values are the constants names instead of the
-    integer (could be usefull for example for an API).
-    Should not be very userfull in normal HTML form life, but we need one because
+    integer (could be useful for example for an API).
+    Should not be very userful in normal HTML form life, but we need one because
     we use forms to do REST parameters validation.
     """
-    def __init__(self, choices=(), required=True, widget=None, label=None,
-                 initial=None, help_text=None, *args, **kwargs):
+    def __init__(self, choices, *args, **kwargs):
         """
         Choices must be instance of ``extended_choices.Choice``.
         """
-        super(NamedExtendedChoiceFormField, self).__init__(required=required,
-               widget=widget, label=label, initial=initial, help_text=help_text,
-               *args, **kwargs)
+        super(NamedExtendedChoiceFormField, self).__init__(*args, **kwargs)
         if not isinstance(choices, Choices):
             raise ValueError("choices must be an instance of extended_choices.Choices")
         self.choices = choices

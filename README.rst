@@ -39,17 +39,15 @@ The aim is to replace this::
 
     STATE_DICT = dict(STATE_CHOICES)
 
-    class ContentModel(models.Model):
+    class Content(models.Model):
         title      = models.CharField(max_length=255)
         content    = models.TextField()
         state      = models.PositiveSmallIntegerField(choices=STATE_CHOICES, default=STATE_DRAFT)
-        related_to = models.ManyToManyField('self', through="ContentToContent", symmetrical=False, blank=True, null=True)
 
         def __unicode__(self):
             return u'Content "%s" (state=%s)' % (self.title, STATE_DICT[self.state])
 
-        def get_related_content(self):
-            return self.related_to.select_related().filter(state=STATE_ONLINE)
+    print(Content.objects.filter(state=STATE_ONLINE))
 
 by this ::
 
@@ -61,17 +59,15 @@ by this ::
         ('OFFLINE', 3, 'Offline'),
     )
 
-    class ContentModel(models.Model):
+    class Content(models.Model):
         title      = models.CharField(max_length=255)
         content    = models.TextField()
         state      = models.PositiveSmallIntegerField(choices=STATES.CHOICES, default=STATES.DRAFT)
-        related_to = models.ManyToManyField('self', through="ContentToContent", symmetrical=False, blank=True, null=True)
 
         def __unicode__(self):
             return u'Content "%s" (state=%s)' % (self.title, STATES.CHOICES_DICT[self.state])
 
-        def get_related_content(self):
-            return self.related_to.select_related().filter(state=STATES.ONLINE)
+    print(Content.objects.filter(state=STATES._ONLINE))
 
 
 As you can see there is only one declaration for all states with, for each state, in order:
