@@ -2,7 +2,7 @@
 
 from .choices import Choices
 
-VERSION = (0, 3, 0)
+VERSION = (0, 3, 1)
 
 __author__ = 'Stephane "Twidi" Ange;'
 __contact__ = "s.angel@twidi.com"
