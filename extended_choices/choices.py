@@ -33,6 +33,13 @@ class Choices:
     - a CHOICES_CONST_DICT that match constant to value
     - a REVERTED_CHOICES_CONST_DICT that match value to constant
 
+    You can also check membership of choices directly:
+
+    >>> 10 in CHOICES_ALIGNEMENT
+    True
+    >>> 11 in CHOICES_ALIGNEMENT
+    False
+
     If you want to create subset of choices, you can
     use the add_subset method
     This method take a name, and then the constants you want to
@@ -41,15 +48,22 @@ class Choices:
     >>> CHOICES_ALIGNEMENT.add_subset('WESTERN',('BAD', 'GOOD'))
     >>> CHOICES_ALIGNEMENT.WESTERN
     ((10, u'bad'), (40, u'good'))
+    >>> CHOICES_ALIGNEMENT.BAD in CHOICES_ALIGNEMENT.WESTERN_DICT
+    True
+    >>> CHOICES_ALIGNEMENT.REVERTED_WESTERN_DICT[u'bad']
+    10
     """
 
     def __init__(self, *choices, **kwargs):
+        # allow usage of collections.OrdereDdict for example
+        self.dict_class = kwargs.get('dict_class', dict)
+
         self.CHOICES = tuple()
-        self.CHOICES_DICT = {}
-        self.REVERTED_CHOICES_DICT = {}
+        self.CHOICES_DICT = self.dict_class()
+        self.REVERTED_CHOICES_DICT = self.dict_class()
         # self.CHOICES_CONST_DICT['const'] is the same as getattr(self, 'const')
-        self.CHOICES_CONST_DICT = {}
-        self.REVERTED_CHOICES_CONST_DICT = {}
+        self.CHOICES_CONST_DICT = self.dict_class()
+        self.REVERTED_CHOICES_CONST_DICT = self.dict_class()
         # For retrocompatibility
         name = kwargs.get('name', 'CHOICES')
         if name != "CHOICES":
@@ -65,6 +79,11 @@ class Choices:
 
     def __iter__(self):
         return self.CHOICES.__iter__()
+
+    def __getitem__(self, key):
+        if not hasattr(self, key):
+            raise KeyError("Key Error : '" + str(key) + "' not found")
+        return getattr(self, key)
 
     def _build_choices(self, *choices):
         CHOICES = list(self.CHOICES)  # for retrocompatibility
@@ -104,10 +123,10 @@ class Choices:
             raise ValueError(u"Cannot use %s as a subset name."
                               "It's already an attribute." % name)
         SUBSET = []
-        SUBSET_DICT = {}  # retrocompatibility
-        REVERTED_SUBSET_DICT = {}  # retrocompatibility
-        SUBSET_CONST_DICT = {}
-        REVERTED_SUBSET_CONST_DICT = {}
+        SUBSET_DICT = self.dict_class()  # retrocompatibility
+        REVERTED_SUBSET_DICT = self.dict_class()  # retrocompatibility
+        SUBSET_CONST_DICT = self.dict_class()
+        REVERTED_SUBSET_CONST_DICT = self.dict_class()
         for const in constants:
             value = getattr(self, const)
             string = self.CHOICES_DICT[value]

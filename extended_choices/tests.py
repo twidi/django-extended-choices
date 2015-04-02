@@ -1,24 +1,31 @@
-# -*- coding: utf-8 -*-
-from django.test import TestCase
+#!/usr/bin/env python
+
+import sys
+if sys.version_info >= (2, 7):
+    import unittest
+else:
+    import unittest2 as unittest
+
 from django import forms
 
-from extended_choices.choices import Choices
-from extended_choices.fields import NamedExtendedChoiceFormField
+from .choices import Choices
+from .fields import NamedExtendedChoiceFormField
 
 MY_CHOICES = Choices(
-   ('ONE', 1, u'One for the money'),
-   ('TWO', 2, u'Two for the show'),
-   ('THREE', 3, u'Three to get ready'),
+    ('ONE', 1, u'One for the money'),
+    ('TWO', 2, u'Two for the show'),
+    ('THREE', 3, u'Three to get ready'),
 )
 MY_CHOICES.add_subset("ODD", ("ONE", "THREE"))
 
-class FieldsTests(TestCase):
+
+class FieldsTests(unittest.TestCase):
     """
     Testing the fields
     """
     def test_named_extended_choice_form_field(self):
         """
-        Should return accept only string, and should return the integer value.
+        Should accept only string, and should return the integer value.
         """
         field = NamedExtendedChoiceFormField(choices=MY_CHOICES)
         # Should work with lowercase
@@ -30,24 +37,47 @@ class FieldsTests(TestCase):
         # Should not validate with integer
         self.assertRaises(forms.ValidationError, field.clean, 1)
 
-class ChoicesTests(TestCase):
+
+class ChoicesTests(unittest.TestCase):
     """
     Testing the choices
     """
+    def test_attributes_and_keys(self):
+        self.assertEqual(MY_CHOICES.ONE, MY_CHOICES['ONE'])
+        with self.assertRaises(AttributeError):
+            MY_CHOICES.FORTY_TWO
+        with self.assertRaises(KeyError):
+            MY_CHOICES['FORTY_TWO']
+
+        # should work for all attributes
+        self.assertEqual(MY_CHOICES.CHOICES, MY_CHOICES['CHOICES'])
+
     def test_simple_choice(self):
-        self.assertEqual(MY_CHOICES.CHOICES,
-                         ((1, u"One for the money"),
-                          (2, u"Two for the show"),
-                          (3, u"Three to get ready"),)
-        )
-        self.assertEqual(MY_CHOICES.CHOICES_DICT,
-                        {1: u'One for the money', 2: u'Two for the show', 3: u'Three to get ready'})
-        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_DICT,
-                         {u'One for the money': 1, u'Three to get ready': 3, u'Two for the show': 2})
-        self.assertEqual(MY_CHOICES.CHOICES_CONST_DICT,
-                         {'ONE': 1, 'TWO': 2, 'THREE': 3})
-        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_CONST_DICT,
-                         {1: 'ONE', 2: 'TWO', 3: 'THREE'})
+        self.assertEqual(MY_CHOICES.CHOICES,(
+            (1, u"One for the money"),
+            (2, u"Two for the show"),
+            (3, u"Three to get ready"),
+        ))
+        self.assertEqual(MY_CHOICES.CHOICES_DICT, {
+            1: u'One for the money',
+            2: u'Two for the show',
+            3: u'Three to get ready'
+        })
+        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_DICT,{
+            u'One for the money': 1,
+            u'Three to get ready': 3,
+            u'Two for the show': 2
+        })
+        self.assertEqual(MY_CHOICES.CHOICES_CONST_DICT,{
+            'ONE': 1,
+            'TWO': 2,
+            'THREE': 3
+        })
+        self.assertEqual(MY_CHOICES.REVERTED_CHOICES_CONST_DICT, {
+            1: 'ONE',
+            2: 'TWO',
+            3: 'THREE'
+        })
 
     def test__contains__(self):
         self.failUnless(MY_CHOICES.ONE in MY_CHOICES)
@@ -56,10 +86,11 @@ class ChoicesTests(TestCase):
         self.assertEqual([k for k, v in MY_CHOICES], [1, 2, 3])
 
     def test_subset(self):
-        self.assertEqual(MY_CHOICES.ODD,
-                        ((1, u'One for the money'), (3, u'Three to get ready')))
-        self.assertEqual(MY_CHOICES.ODD_CONST_DICT,
-                         {'ONE': 1, 'THREE': 3})
+        self.assertEqual(MY_CHOICES.ODD,(
+            (1, u'One for the money'),
+            (3, u'Three to get ready')
+        ))
+        self.assertEqual(MY_CHOICES.ODD_CONST_DICT,{'ONE': 1, 'THREE': 3})
 
     def test_unique_values(self):
         self.assertRaises(ValueError, Choices, ('TWO', 4, u'Deux'), ('FOUR', 4, u'Quatre'))
@@ -68,18 +99,53 @@ class ChoicesTests(TestCase):
         self.assertRaises(ValueError, Choices, ('TWO', 2, u'Deux'), ('TWO', 4, u'Quatre'))
 
     def test_retrocompatibility(self):
-        MY_CHOICES = Choices(
-           ('TWO', 2, u'Deux'),
-           ('FOUR', 4, u'Quatre'),
-           name="EVEN"
+        OTHER_CHOICES = Choices(
+            ('TWO', 2, u'Deux'),
+            ('FOUR', 4, u'Quatre'),
+            name="EVEN"
         )
-        MY_CHOICES.add_choices("ODD",
-           ('ONE', 1, u'Un'),
-           ('THREE', 3, u'Trois'),
+        OTHER_CHOICES.add_choices("ODD",
+            ('ONE', 1, u'Un'),
+            ('THREE', 3, u'Trois'),
         )
-        self.assertEqual(MY_CHOICES.CHOICES,
-                         ((2, u'Deux'), (4, u'Quatre'), (1, u'Un'), (3, u'Trois'))
-        )
-        self.assertEqual(MY_CHOICES.ODD, ((1, u'Un'), (3, u'Trois')))
-        self.assertEqual(MY_CHOICES.EVEN, ((2, u'Deux'), (4, u'Quatre')))
+        self.assertEqual(OTHER_CHOICES.CHOICES, (
+            (2, u'Deux'),
+            (4, u'Quatre'),
+            (1, u'Un'),
+            (3, u'Trois')
+        ))
+        self.assertEqual(OTHER_CHOICES.ODD, ((1, u'Un'), (3, u'Trois')))
+        self.assertEqual(OTHER_CHOICES.EVEN, ((2, u'Deux'), (4, u'Quatre')))
 
+    def test_dict_class(self):
+        if sys.version_info >= (2, 7):
+            from collections import OrderedDict
+        else:
+            from django.utils.datastructures import SortedDict as OrderedDit
+
+        OTHER_CHOICES = Choices(
+            ('ONE', 1, u'One for the money'),
+            ('TWO', 2, u'Two for the show'),
+            ('THREE', 3, u'Three to get ready'),
+            dict_class = OrderedDict
+        )
+        OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
+
+        for attr in (
+                # normal choice
+                'CHOICES_DICT',
+                'REVERTED_CHOICES_DICT',
+                'CHOICES_CONST_DICT',
+                'REVERTED_CHOICES_CONST_DICT',
+                # subset
+                'ODD_DICT',
+                'REVERTED_ODD_DICT',
+                'ODD_CONST_DICT',
+                'REVERTED_ODD_CONST_DICT',
+            ):
+            self.assertFalse(isinstance(getattr(MY_CHOICES, attr), OrderedDict))
+            self.assertTrue(isinstance(getattr(OTHER_CHOICES, attr), OrderedDict))
+
+
+if __name__ == "__main__":
+    unittest.main()

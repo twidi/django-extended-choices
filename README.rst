@@ -39,17 +39,15 @@ The aim is to replace this::
 
     STATE_DICT = dict(STATE_CHOICES)
 
-    class ContentModel(models.Model):
+    class Content(models.Model):
         title      = models.CharField(max_length=255)
         content    = models.TextField()
         state      = models.PositiveSmallIntegerField(choices=STATE_CHOICES, default=STATE_DRAFT)
-        related_to = models.ManyToManyField('self', through="ContentToContent", symmetrical=False, blank=True, null=True)
 
         def __unicode__(self):
             return u'Content "%s" (state=%s)' % (self.title, STATE_DICT[self.state])
 
-        def get_related_content(self):
-            return self.related_to.select_related().filter(state=STATE_ONLINE)
+    print(Content.objects.filter(state=STATE_ONLINE))
 
 by this ::
 
@@ -61,24 +59,22 @@ by this ::
         ('OFFLINE', 3, 'Offline'),
     )
 
-    class ContentModel(models.Model):
+    class Content(models.Model):
         title      = models.CharField(max_length=255)
         content    = models.TextField()
         state      = models.PositiveSmallIntegerField(choices=STATES.CHOICES, default=STATES.DRAFT)
-        related_to = models.ManyToManyField('self', through="ContentToContent", symmetrical=False, blank=True, null=True)
 
         def __unicode__(self):
             return u'Content "%s" (state=%s)' % (self.title, STATES.CHOICES_DICT[self.state])
 
-        def get_related_content(self):
-            return self.related_to.select_related().filter(state=STATES.ONLINE)
+    print(Content.objects.filter(state=STATES._ONLINE))
 
 
 As you can see there is only one declaration for all states with, for each state, in order:
 
 * the pseudo-constant name which can be used (`STATES.ONLINE` replaces the previous `STATE_ONLINE`)
-* the value to use as key in database
-* the name to be displayed
+* the value to use as key in database - which could equally be a string
+* the name to be displayed - and you can wrap the text in `ugettext_lazy()` if you need i18n
 
 And then, you can use:
 
@@ -87,6 +83,29 @@ And then, you can use:
 * `STATES.REVERTED_CHOICES_DICT`, a dict to get the key from the displayable value (can be useful in some case)
 * `STATES.CHOICES_CONST_DICT`, a dict to get value from constant name
 * `STTES.REVERTED_CHOICES_CONST_DICT`, a dict to get constant name from value
+
+Note that each of these attribute can be accessed via a dict key (`STATES['ONLINE']` for example) if
+ you want to fight your IDE that may warn you about undefined attributes.
+
+
+You can check whether a value is in `STATES` directly::
+
+    def is_online(self):
+        # it's an example, we could have test STATES.ONLINE
+        return self.state in STATES
+
+`not in` ? Yes, you can use `in` and even iterate on Choices objects !
+
+
+If you want dicts to be ordered, you can pass the dict class to use to the `Choices` constructor::
+
+    from collections import OrderedDict
+    STATES = Choices(
+        ('ONLINE',  1, 'Online'),
+        ('DRAFT',   2, 'Draft'),
+        ('OFFLINE', 3, 'Offline'),
+        dict_class = OrderedDict
+    )
 
 
 You can create subsets of choices within the sane variable::
@@ -97,16 +116,26 @@ You can create subsets of choices within the sane variable::
         ('OFFLINE', 3, 'Offline'),
     )
 
-    STATES.add_subset('NOT_ONLINE', ('DRAFT', 'OFFILNE',))
+    STATES.add_subset('NOT_ONLINE', ('DRAFT', 'OFFLINE',))
 
-Now, `STATES.NOT_ONLINE` is a full `Choices` object, with a subset of the main STATES choices.
-You can use it in a filter::
+Now, `STATES.NOT_ONLINE` is a real `Choices` object, with a subset of the main `STATES` choices.
+
+You can use it to generate choices for when you only want a subset of choices available::
+
+    offline_state = models.PositiveSmallIntegerField(choices=STATES.NOT_ONLINE, default=STATES.DRAFT)
+
+You also get:
+
+* `STATES.NOT_ONLINE_DICT`, a dict to get the value to display with the key used in database
+* `STATES.REVERTED_NOT_ONLINE_DICT`, a dict to get the key from the displayable value (can be useful in some case)
+* `STATES.NOT_ONLINE_CONST_DICT`, a dict to get value from constant name
+* `STATES.REVERTED_NOT_ONLINE_CONST_DICT`, a dict to get constant name from value
+
+If you want to check membership in subset you could do::
 
     def is_online(self):
         # it's an example, we could have test STATES.ONLINE
-        return self.state not in STATES.NOT_ONLINE
-
-`not in` ? Yes, you can use `in` and even iterate on Choices objects !
+        return self.state not in STATES.NOT_ONLINE_DICT
 
 -----
 Notes
@@ -135,6 +164,14 @@ Source code
 -----------
 
 The source code is available on github_
+
+-----
+Tests
+-----
+
+To run tests from the code source, create a virtualenv or activate one, install django, then::
+
+    python -m extended_choices.tests
 
 
 ------
