@@ -123,7 +123,7 @@ class ChoicesTests(unittest.TestCase):
         if sys.version_info >= (2, 7):
             from collections import OrderedDict
         else:
-            from django.utils.datastructures import SortedDict as OrderedDit
+            from django.utils.datastructures import SortedDict as OrderedDict
 
         OTHER_CHOICES = Choices(
             ('ONE', 1, 'One for the money'),
