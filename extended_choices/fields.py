@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+
+from past.builtins import basestring
+
 from django import forms
 
 from . import Choices
@@ -24,7 +28,7 @@ class NamedExtendedChoiceFormField(forms.Field):
         """
         # is_required is checked in validate
         if value is None: return None
-        if not isinstance(value, (str, unicode)):
+        if not isinstance(value, basestring):
             raise forms.ValidationError("Invalid value format.")
         try:
             final = getattr(self.choices, value.upper())

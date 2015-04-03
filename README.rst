@@ -1,3 +1,5 @@
+|PyPI Version| |Build Status|
+
 django-extended-choices
 =======================
 
@@ -174,6 +176,14 @@ To run tests from the code source, create a virtualenv or activate one, install 
     python -m extended_choices.tests
 
 
+---------
+Python 3?
+---------
+
+Of course! We support python 2.6, 2.7, 3.3 and 3.4
+
+For Django version 1.4.x to 1.8.x, respecting the `django matrix`_ (except for python 2.5 and 3.2)
+
 ------
 Author
 ------
@@ -182,7 +192,12 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 .. _choices: http://docs.djangoproject.com/en/1.5/ref/models/fields/#choices
 .. _django: http://www.djangoproject.com/
 .. _github: https://github.com/twidi/django-extended-choices
+.. _django matrix: https://docs.djangoproject.com/en/1.8/faq/install/#what-python-version-can-i-use-with-django
 
+.. |PyPI Version| image:: https://pypip.in/v/django-extended-choices/badge.png
+   :target: https://pypi.python.org/pypi/django-extended-choices
+.. |Build Status| image:: https://travis-ci.org/twidi/django-extended-choices.png
+   :target: https://travis-ci.org/twidi/django-extended-choices
 
 .. image:: https://d2weczhvl823v0.cloudfront.net/twidi/django-extended-choices/trend.png
    :alt: Bitdeli badge
