@@ -18,7 +18,7 @@ if sys.version_info < (2, 7):
 
 setup(
     name="django-extended-choices",
-    version="0.4.0",
+    version="0.4.1",
     license="GPL",
     description="Little helper application to improve django choices"
     "(for fields)",
@@ -38,7 +38,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7"
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
