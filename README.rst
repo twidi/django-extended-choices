@@ -3,16 +3,16 @@
 django-extended-choices
 =======================
 
-A little application to improve django choices
+A little application to improve Django choices
 ----------------------------------------------
 
 ``django-extended-choices`` aims to provide a better and more readable
-way of using choices_ in django_.
+way of using choices_ in Django_.
 
 Installation
 ------------
 
-You can install directly via pip (since version ```0.3``)::
+You can install directly via pip (since version ``0.3``)::
 
     $ pip install django-extended-choices
 
@@ -77,7 +77,7 @@ by this:
 As you can see there is only one declaration for all states with, for each state, in order:
 
 * the pseudo-constant name which can be used (``STATES.ONLINE`` replaces the previous ``STATE_ONLINE``)
-* the value to use as key in database - which could equally be a string
+* the value to use in the database - which could equally be a string
 * the name to be displayed - and you can wrap the text in ``ugettext_lazy()`` if you need i18n
 
 And then, you can use:
@@ -112,7 +112,7 @@ These attributes are chainable (with a weird example to see chainability):
     'Online'
 
 Note that constants can be accessed via a dict key (``STATES['ONLINE']`` for example) if
- you want to fight your IDE that may warn you about undefined attributes.
+you want to fight your IDE that may warn you about undefined attributes.
 
 
 You can check whether a value is in a ``Choices`` object directly:
@@ -146,7 +146,7 @@ attribute:
     ('DRAFT',   2, 'Draft'),
     ('OFFLINE', 3, 'Offline'),
 
-Or the following dicts, using constants, value or display name as keys, and the matching
+Or the following dicts, using constants, values or display names, as keys, and the matching
 choice entry as values:
 
 * ``STATES.constants``
@@ -187,7 +187,7 @@ You can check if a constant, value, or display name exists:
     >>> STATES.has_display('Online')
     True
 
-You can create subsets of choices within the sane ``Choices`` instance:
+You can create subsets of choices within the same ``Choices`` instance:
 
 .. code-block:: python
 
@@ -197,7 +197,7 @@ You can create subsets of choices within the sane ``Choices`` instance:
     (3, 'Offline')
 
 Now, ``STATES.NOT_ONLINE`` is a real ``Choices`` instance, with a subset of the main ``STATES``
-instance.
+constants.
 
 You can use it to generate choices for when you only want a subset of choices available:
 
@@ -254,17 +254,21 @@ To construct the same ``Choices`` as before, we could have done:
         name='NOT_ONLINE'
     )
 
+You can also pass the ``argument`` to the ``Choices`` constructor to create a subset with all
+the choices entries added at the same time (it will call ``add_choices`` with the name and the
+entries)
+
 Notes
 -----
 
 * You also have a very basic field (``NamedExtendedChoiceFormField```) in ``extended_choices.fields`` which accept constant names instead of values
-* Feel free to read the source to learn more about this little django app.
+* Feel free to read the source to learn more about this little Django app.
 * You can declare your choices where you want. My usage is in the ``models.py`` file, just before the class declaration.
 
 Compatibility
 -------------
 
-The version 1 provides a totally new API, but stays fully compatible with the previous one
+The version ``1.0`` provides a totally new API, but stays fully compatible with the previous one
 (``0.4.1``). So it adds a lot of attributes in each ``Choices`` instance:
 
 * ``CHOICES``
@@ -287,16 +291,16 @@ a ``Choices`` instance:
     )
 
 This flag is currently ``True`` by default, and it will not be changed for at least 6 months
-counting from the publication of this version 1 (1st of May, 2015, so until the 1st of November,
-2015, AT LEAST, the compatibility will be on by default).
+counting from the publication of this version ``1.0`` (``1st of May, 2015``, so until the
+``1st of November, 2015``, AT LEAST, the compatibility will be on by default).
 
 Then, the flag will stay but will be off by default. To keep compatibility, you'll have to
 pass the ``retro_compatibility`` argument and set it to ``True``.
 
 Then, after another period of 6 months minimum, the flag and all the retro_compatibility code
-will be removed (so not before 1st of May, 2016).
+will be removed (so not before ``1st of May, 2016``).
 
-Note that you can stay to a specific version by pinning it in your requirements.
+Note that you can use a specific version by pinning it in your requirements.
 
 
 License
@@ -307,14 +311,15 @@ Licensed under the General Public License (GPL). See the ``LICENSE`` file includ
 Python 3?
 ---------
 
-Of course! We support python 2.6, 2.7, 3.3 and 3.4, for Django version 1.4.x to 1.8.x,
-respecting the `django matrix`_ (except for python 2.5 and 3.2)
+Of course! We support python ``2.6``, ``2.7``, ``3.3`` and `3.4`, for Django version ``1.4.x`` to
+``1.8.x``, respecting the `Django matrix`_ (except for python ``2.5`` and ``3.2`` which are not
+supported by ``django-extended-choices``)
 
 
 Tests
 -----
 
-To run tests from the code source, create a virtualenv or activate one, install django, then::
+To run tests from the code source, create a virtualenv or activate one, install Django, then::
 
     python -m extended_choices.tests
 
@@ -327,13 +332,13 @@ We also provides some quick doctests in the code documentation. To execute them:
 Source code
 -----------
 
-The source code is available on Github_
+The source code is available on Github_.
 
 
 Developing
 ----------
 
-If you want to participate to the development of this library, you'll need ``django``
+If you want to participate in the development of this library, you'll need ``Django``
 installed in your virtualenv. If you don't have it, simply run::
 
     pip install -r requirements-dev.txt
@@ -343,7 +348,7 @@ Don't forget to run the tests ;)
 Feel free to propose a pull request on Github_!
 
 A few minutes after your pull request, tests will be executed on TravisCi_ for all the versions
-of python and django we support.
+of python and Django we support.
 
 
 Documentation
@@ -364,9 +369,9 @@ Author
 Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), originally for http://www.liberation.fr
 
 .. _choices: http://docs.djangoproject.com/en/1.5/ref/models/fields/#choices
-.. _django: http://www.djangoproject.com/
+.. _Django: http://www.djangoproject.com/
 .. _Github: https://github.com/twidi/django-extended-choices
-.. _django matrix: https://docs.djangoproject.com/en/1.8/faq/install/#what-python-version-can-i-use-with-django
+.. _Django matrix: https://docs.djangoproject.com/en/1.8/faq/install/#what-python-version-can-i-use-with-django
 .. _TravisCi: https://travis-ci.org/twidi/django-extended-choices/pull_requests
 .. _RedTheDoc: http://django-extended-choices.readthedocs.org
 
