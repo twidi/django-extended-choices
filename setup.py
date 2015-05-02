@@ -18,7 +18,7 @@ if sys.version_info < (2, 7):
 
 setup(
     name="django-extended-choices",
-    version="1.0a1",
+    version="1.0",
     license="GPL",
     description="Little helper application to improve django choices"
     "(for fields)",
@@ -34,8 +34,13 @@ setup(
         'makedoc': ['django', 'sphinx', 'sphinxcontrib-napoleon', 'sphinx_rtd_theme'],
     },
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Framework :: Django",
+        "Framework :: Django :: 1.4",
+        "Framework :: Django :: 1.5",
+        "Framework :: Django :: 1.6",
+        "Framework :: Django :: 1.7",
+        "Framework :: Django :: 1.8",
         "Operating System :: OS Independent",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License (GPL)",
@@ -46,5 +51,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
+        "Topic :: Software Development :: Libraries",
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ]
 )
