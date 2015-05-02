@@ -18,8 +18,8 @@ if sys.version_info < (2, 7):
 
 setup(
     name="django-extended-choices",
-    version="1.0",
-    license="GPL",
+    version="1.0.2",
+    license="BSD",
     description="Little helper application to improve django choices"
     "(for fields)",
     long_description=read_relative_file('README.rst'),
@@ -43,7 +43,7 @@ setup(
         "Framework :: Django :: 1.8",
         "Operating System :: OS Independent",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU General Public License (GPL)",
+        "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
