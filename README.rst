@@ -1,4 +1,4 @@
-|PyPI Version| |Build Status|
+|PyPI Version| |Build Status| |Doc Status|
 
 django-extended-choices
 =======================
@@ -16,7 +16,7 @@ You can install directly via pip (since version ```0.3``)::
 
     $ pip install django-extended-choices
 
-Or from the github_ repository (``master`` branch by default)::
+Or from the Github_ repository (``master`` branch by default)::
 
     $ git clone git://github.com/twidi/django-extended-choices.git
     $ cd django-extended-choices
@@ -304,11 +304,12 @@ License
 
 Licensed under the General Public License (GPL). See the ``LICENSE`` file included
 
+Python 3?
+---------
 
-Source code
------------
+Of course! We support python 2.6, 2.7, 3.3 and 3.4, for Django version 1.4.x to 1.8.x,
+respecting the `django matrix`_ (except for python 2.5 and 3.2)
 
-The source code is available on github_
 
 Tests
 -----
@@ -323,11 +324,40 @@ We also provides some quick doctests in the code documentation. To execute them:
     python -m extended_choices.choices
 
 
-Python 3?
----------
+Source code
+-----------
 
-Of course! We support python 2.6, 2.7, 3.3 and 3.4, for Django version 1.4.x to 1.8.x,
-respecting the `django matrix`_ (except for python 2.5 and 3.2)
+The source code is available on Github_
+
+
+Developing
+----------
+
+If you want to participate to the development of this library, you'll need ``django``
+installed in your virtualenv. If you don't have it, simply run::
+
+    pip install -r requirements-dev.txt
+
+Don't forget to run the tests ;)
+
+Feel free to propose a pull request on Github_!
+
+A few minutes after your pull request, tests will be executed on TravisCi_ for all the versions
+of python and django we support.
+
+
+Documentation
+-------------
+
+You can find the documentation on ReadTheDoc_
+
+To update the documentation, you'll need some tools::
+
+    pip install -r requirements-makedoc.txt
+
+Then go to the ``docs`` directory, and run::
+
+    make html
 
 Author
 ------
@@ -335,15 +365,21 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 
 .. _choices: http://docs.djangoproject.com/en/1.5/ref/models/fields/#choices
 .. _django: http://www.djangoproject.com/
-.. _github: https://github.com/twidi/django-extended-choices
+.. _Github: https://github.com/twidi/django-extended-choices
 .. _django matrix: https://docs.djangoproject.com/en/1.8/faq/install/#what-python-version-can-i-use-with-django
+.. _TravisCi: https://travis-ci.org/twidi/django-extended-choices/pull_requests
+.. _RedTheDoc: http://django-extended-choices.readthedocs.org
 
-.. |PyPI Version| image:: https://pypip.in/v/django-extended-choices/badge.png
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/django-extended-choices.png
    :target: https://pypi.python.org/pypi/django-extended-choices
+   :alt: PyPI Version
 .. |Build Status| image:: https://travis-ci.org/twidi/django-extended-choices.png
    :target: https://travis-ci.org/twidi/django-extended-choices
+   :alt: Build Status on Travis CI
+.. |Doc Status| image:: https://readthedocs.org/projects/django-extended-choices/badge/?version=latest
+   :target: http://django-extended-choices.readthedocs.org
+   :alt: Documentation Status on ReadTheDoc
 
 .. image:: https://d2weczhvl823v0.cloudfront.net/twidi/django-extended-choices/trend.png
    :alt: Bitdeli badge
    :target: https://bitdeli.com/free
-

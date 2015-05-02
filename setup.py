@@ -29,6 +29,10 @@ setup(
     install_requires=install_requires,
     packages=find_packages(),
     include_package_data=True,
+    extras_require= {
+        'dev': ['django'],
+        'makedoc': ['django', 'sphinx', 'sphinxcontrib-napoleon', 'sphinx_rtd_theme'],
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Framework :: Django",
