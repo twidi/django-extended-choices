@@ -498,6 +498,31 @@ class ChoicesTestCase(BaseTestCase):
         with self.assertRaises(IndexError):
             self.MY_CHOICES.__getitem__(3)
 
+    def test_it_should_work_with_django_promises(self):
+        """Test that it works with django promises, like ``ugettext_lazy``."""
+
+        import django
+        from django.utils.functional import Promise
+        from django.utils.translation import ugettext_lazy as _
+
+         # Init django, only needed starting from django 1.7
+        if django.VERSION >= (1, 7):
+            django.setup()
+
+        choices = Choices(
+            ('ONE', 1, _('one')),
+            ('TWO', 2, _('two')),
+        )
+
+        # Key in ``displays`` dict should be promises
+        self.assertIsInstance(list(choices.displays.keys())[0], Promise)
+
+        # And that they can be retrieved
+        self.assertTrue(choices.has_display(_('one')))
+        self.assertEqual(choices.displays[_('two')].value, 2)
+
+        return
+
 
 class ChoiceAttributeMixinTestCase(BaseTestCase):
     """Test the ``ChoiceAttributeMixin`` class."""
@@ -576,6 +601,23 @@ class ChoiceAttributeMixinTestCase(BaseTestCase):
         self.assertEqual(attr.value, self.choice_entry.value)
         self.assertEqual(attr.display, self.choice_entry.display)
 
+    def test_it_should_work_with_django_promises(self):
+        """Test that it works with django promises, like ``ugettext_lazy``."""
+
+        import django
+        from django.utils.functional import Promise
+        from django.utils.translation import ugettext_lazy
+
+         # Init django, only needed starting from django 1.7
+        if django.VERSION >= (1, 7):
+            django.setup()
+
+        value = ugettext_lazy('foo')
+        klass = ChoiceAttributeMixin.get_class_for_value(value)
+        attr = klass(value, self.choice_entry)
+
+        self.assertIsInstance(attr, Promise)
+        self.assertEqual(attr, ugettext_lazy('foo'))
 
 class ChoiceEntryTestCase(BaseTestCase):
     """Test the ``ChoiceEntry`` class."""
@@ -653,6 +695,22 @@ class ChoiceEntryTestCase(BaseTestCase):
             ChoiceEntry(('FOO', 1, 'foo', {'bar': 1, 'baz': 2}, 'QUZ'))
         with self.assertRaises(AssertionError):
             ChoiceEntry(('FOO', 1, 'foo', {'bar': 1, 'baz': 2}, 'QUZ', 'QUX'))
+
+    def test_it_should_work_with_django_promises(self):
+        """Test that ``ChoiceEntry`` class works with django promises, like ``ugettext_lazy``."""
+
+        import django
+        from django.utils.functional import Promise
+        from django.utils.translation import ugettext_lazy
+
+         # Init django, only needed starting from django 1.7
+        if django.VERSION >= (1, 7):
+            django.setup()
+
+        choice_entry = ChoiceEntry(('FOO', 1, ugettext_lazy('foo')))
+
+        self.assertIsInstance(choice_entry.display, Promise)
+        self.assertEqual(choice_entry.display, ugettext_lazy('foo'))
 
 
 class OldChoicesTestCase(BaseTestCase):

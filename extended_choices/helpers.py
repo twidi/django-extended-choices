@@ -13,6 +13,8 @@ from __future__ import unicode_literals
 
 from builtins import object
 
+from django.utils.functional import Promise
+
 
 class ChoiceAttributeMixin(object):
     """Base class to represent an attribute of a ``ChoiceEntry``.
@@ -68,7 +70,12 @@ class ChoiceAttributeMixin(object):
         All others are not needed for the other class, only for this mixin.
 
         """
+        if issubclass(cls, Promise):
+            # Special case to manage lazy django stuff like ugettext_lazy
+            return super(ChoiceAttributeMixin, cls).__new__(cls)
+
         return super(ChoiceAttributeMixin, cls).__new__(cls, *args[:1])
+
 
     def __init__(self, value, choice_entry):
         """Initiate the object to save the value and the choice entry.
@@ -88,8 +95,12 @@ class ChoiceAttributeMixin(object):
         expect the ``choice_entry`` parameter.
 
         """
+        if isinstance(self, Promise):
+            # Special case to manage lazy django stuff like ugettext_lazy
+            super(ChoiceAttributeMixin, self).__init__(value._proxy____args, value._proxy____kw)
+        else:
+            super(ChoiceAttributeMixin, self).__init__()
 
-        super(ChoiceAttributeMixin, self).__init__()
         self.choice_entry = choice_entry
 
     @property
@@ -220,6 +231,5 @@ class ChoiceEntry(tuple):
         An instance of a class based on ``ChoiceAttributeMixin`` for the given value.
 
         """
-
         klass = self.ChoiceAttributeMixin.get_class_for_value(value)
         return klass(value, self)
