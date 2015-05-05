@@ -311,7 +311,7 @@ Available under the BSD_ License. See the ``LICENSE`` file included
 Python 3?
 ---------
 
-Of course! We support python ``2.6``, ``2.7``, ``3.3`` and `3.4`, for Django version ``1.4.x`` to
+Of course! We support python ``2.6``, ``2.7``, ``3.3`` and `3.4`, for Django version ``1.5.x`` to
 ``1.8.x``, respecting the `Django matrix`_ (except for python ``2.5`` and ``3.2`` which are not
 supported by ``django-extended-choices``)
 
