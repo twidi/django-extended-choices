@@ -111,6 +111,8 @@ These attributes are chainable (with a weird example to see chainability):
     >>> entry.constant.value.value.display.constant.display
     'Online'
 
+To allow this, we had to remove support for ``None`` values. Use empty strings instead.
+
 Note that constants can be accessed via a dict key (``STATES['ONLINE']`` for example) if
 you want to fight your IDE that may warn you about undefined attributes.
 
@@ -301,6 +303,12 @@ Then, after another period of 6 months minimum, the flag and all the retro_compa
 will be removed (so not before ``1st of May, 2016``).
 
 Note that you can use a specific version by pinning it in your requirements.
+
+The only exception to these rules, it's the support of Django ``1.4`` that was removed in version
+``1.0.3`` due to some incompatibility problems with ``ugettext_lazy``.
+
+Also, the support of ``None`` values was removed, raising a ``ValueError`` telling the user to
+instead use an empty string.
 
 
 License
