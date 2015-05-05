@@ -712,6 +712,16 @@ class ChoiceEntryTestCase(BaseTestCase):
         self.assertIsInstance(choice_entry.display, Promise)
         self.assertEqual(choice_entry.display, ugettext_lazy('foo'))
 
+        self.assertEqual(choice_entry.display.constant, 'FOO')
+        self.assertEqual(choice_entry.display.value, 1)
+        self.assertEqual(choice_entry.display.display, ugettext_lazy('foo'))
+
+    def test_it_should_raise_with_none_value(self):
+        """Test that it's clear that we don't support None values."""
+
+        with self.assertRaises(ValueError):
+            ChoiceEntry(('FOO', None, 'foo'))
+
 
 class OldChoicesTestCase(BaseTestCase):
     """Test of tje ``Choices`` implementation as defined on version 0.4.1, for retro-compatibility.

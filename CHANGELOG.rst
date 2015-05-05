@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Release *v1.0.4* - ``2015-05-05``
+---------------------------------
+* explicitly raise ``ValueError`` when using ``None`` for constant, value or display name.
+
 Release *v1.0.3* - ``2015-05-05``
 ---------------------------------
 * make it work again with Django ``ugettext_lazy``
