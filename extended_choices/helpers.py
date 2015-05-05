@@ -70,6 +70,7 @@ class ChoiceAttributeMixin(object):
         All others are not needed for the other class, only for this mixin.
 
         """
+
         if issubclass(cls, Promise):
             # Special case to manage lazy django stuff like ugettext_lazy
             return super(ChoiceAttributeMixin, cls).__new__(cls)
@@ -95,6 +96,7 @@ class ChoiceAttributeMixin(object):
         expect the ``choice_entry`` parameter.
 
         """
+
         if isinstance(self, Promise):
             # Special case to manage lazy django stuff like ugettext_lazy
             super(ChoiceAttributeMixin, self).__init__(value._proxy____args, value._proxy____kw)
@@ -230,6 +232,16 @@ class ChoiceEntry(tuple):
         -------
         An instance of a class based on ``ChoiceAttributeMixin`` for the given value.
 
+        Raises
+        ------
+        ValueError
+            If the value is None, as we cannot really subclass NoneType.
+
         """
+
+        if value is None:
+            raise ValueError('Using `None` in a `Choices` object is not supported. You may '
+                             'use an empty string.')
+
         klass = self.ChoiceAttributeMixin.get_class_for_value(value)
         return klass(value, self)
