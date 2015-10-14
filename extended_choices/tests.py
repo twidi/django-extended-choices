@@ -15,12 +15,23 @@ from __future__ import unicode_literals
 
 import os, sys
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 if sys.version_info >= (2, 7):
     import unittest
 else:
     import unittest2 as unittest
 
 import django
+
+# Use an ordered dict, from python or django depending on the python version.
+if sys.version_info >= (2, 7):
+    from collections import OrderedDict
+else:
+    from django.utils.datastructures import SortedDict as OrderedDict
 
 # Minimal django conf to test a real field.
 from django.conf import settings
@@ -861,12 +872,6 @@ class OldChoicesTestCase(BaseTestCase):
     def test_dict_class(self):
         """Test that the dict class to use can be set on the constructor."""
 
-        # For the test, use an ordered dict, from python or django depending on the python version.
-        if sys.version_info >= (2, 7):
-            from collections import OrderedDict
-        else:
-            from django.utils.datastructures import SortedDict as OrderedDict
-
         OTHER_CHOICES = Choices(
             ('ONE', 1, 'One for the money'),
             ('TWO', 2, 'Two for the show'),
@@ -890,6 +895,68 @@ class OldChoicesTestCase(BaseTestCase):
             ):
             self.assertFalse(isinstance(getattr(self.MY_CHOICES, attr), OrderedDict))
             self.assertTrue(isinstance(getattr(OTHER_CHOICES, attr), OrderedDict))
+
+    def test_pickle_choice_attribute(self):
+        """Test that a choice attribute could be pickled and unpickled."""
+
+        value = self.MY_CHOICES.ONE
+
+        pickled_value = pickle.dumps(value)
+        unpickled_value = pickle.loads(pickled_value)
+
+        self.assertEqual(unpickled_value, value)
+        self.assertEqual(unpickled_value.choice_entry, value.choice_entry)
+        self.assertEqual(unpickled_value.constant, 'ONE')
+        self.assertEqual(unpickled_value.display, 'One for the money')
+        self.assertEqual(unpickled_value.value, 1)
+
+    def test_pickle_choice_entry(self):
+        """Test that a choice entry could be pickled and unpickled."""
+
+        entry = self.MY_CHOICES.ONE.choice_entry
+
+        pickled_entry = pickle.dumps(entry)
+        unpickled_entry = pickle.loads(pickled_entry)
+
+        self.assertEqual(unpickled_entry, entry)
+        self.assertEqual(unpickled_entry.constant, 'ONE')
+        self.assertEqual(unpickled_entry.display, 'One for the money')
+        self.assertEqual(unpickled_entry.value, 1)
+
+    def test_pickle_choice(self):
+        """Test that a choice object could be pickled and unpickled."""
+
+        # Simple choice
+        pickled_choice = pickle.dumps(self.MY_CHOICES)
+        unpickled_choice = pickle.loads(pickled_choice)
+
+        self.assertEqual(unpickled_choice, self.MY_CHOICES)
+
+        # With a name, extra arguments and subsets
+        OTHER_CHOICES = Choices(
+            'ALL',
+            ('ONE', 1, 'One for the money'),
+            ('TWO', 2, 'Two for the show'),
+            ('THREE', 3, 'Three to get ready'),
+            dict_class = OrderedDict,
+            retro_compatibility=False,
+            mutable=False
+        )
+        OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
+        OTHER_CHOICES.add_subset("EVEN", ("TWO", ))
+
+        pickled_choice = pickle.dumps(OTHER_CHOICES)
+        unpickled_choice = pickle.loads(pickled_choice)
+
+        self.assertEqual(unpickled_choice, OTHER_CHOICES)
+        self.assertEqual(unpickled_choice.dict_class, OrderedDict)
+        self.assertFalse(unpickled_choice.retro_compatibility)
+        self.assertFalse(unpickled_choice._mutable)
+        self.assertEqual(unpickled_choice.subsets, OTHER_CHOICES.subsets)
+        self.assertEqual(unpickled_choice.ALL, OTHER_CHOICES.ALL)
+        self.assertEqual(unpickled_choice.ODD, OTHER_CHOICES.ODD)
+        self.assertEqual(unpickled_choice.EVEN, OTHER_CHOICES.EVEN)
+
 
 
 if __name__ == "__main__":

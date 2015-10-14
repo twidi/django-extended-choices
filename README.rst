@@ -260,6 +260,8 @@ You can also pass the ``argument`` to the ``Choices`` constructor to create a su
 the choices entries added at the same time (it will call ``add_choices`` with the name and the
 entries)
 
+The list of existing subset names is in the ``subsets`` attributes of the parent ``Choicess`` object.
+
 Notes
 -----
 
