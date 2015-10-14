@@ -93,7 +93,6 @@ class Choices(list):
         ``values`` and ``displays``. Could be set for example to ``OrderedSet``.
     retro_compatibility : boolean, optional
         ``True`` by default, it makes the ``Choices`` object compatible with version < 1.
-
         If set to ``False``, all the attributes created for this purpose wont be created.
 
     Example
@@ -196,6 +195,9 @@ class Choices(list):
 
         # List of ``ChoiceEntry``, one for each choice in this instance.
         self.entries = []
+
+        # List of the created subsets
+        self.subsets = []
 
         # Dicts to access ``ChoiceEntry`` instances by constant, value or display value.
         self.constants = self.dict_class()
@@ -305,7 +307,7 @@ class Choices(list):
             choices = choices[1:]
 
         # Check for an optional subset name in the named arguments.
-        if 'name' in kwargs:
+        if kwargs.get('name', None):
             if subset_name:
                 raise ValueError("The name of the subset cannot be defined as the first "
                                  "argument and also as a named argument")
@@ -464,6 +466,7 @@ class Choices(list):
 
         # Make the subset accessible via an attribute.
         setattr(self, name, subset)
+        self.subsets.append(name)
 
         # Will be removed one day. See the "compatibility" section in the documentation.
         if self.retro_compatibility:
@@ -487,7 +490,6 @@ class Choices(list):
             setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_SUBSET_DICT)
             setattr(self, '%s_CONST_DICT' % name, SUBSET_CONST_DICT)
             setattr(self, 'REVERTED_%s_CONST_DICT' % name, REVERTED_SUBSET_CONST_DICT)
-
 
     def for_constant(self, constant):
         """Returns the ``ChoiceEntry`` for the given constant.
@@ -767,6 +769,83 @@ class Choices(list):
         return super(Choices, self).__eq__(other)
 
     # TODO: implement __iadd__ and __add__
+
+    def __reduce__(self):
+        """Reducer to make the auto-created classes picklable.
+
+        Returns
+        -------
+        tuple
+            A tuple as expected by pickle, to recreate the object when calling ``pickle.loads``:
+            1. a callable to recreate the object
+            2. a tuple with all positioned arguments expected by this callable
+
+        """
+
+        return (
+            # Function to create a ``Choices`` instance
+            create_choice,
+            (
+                # The ``Choices`` class, or a subclass, used to create the current instance
+                self.__class__,
+                # The list of choices
+                [
+                    (
+                        entry.constant.original_value,
+                        entry.value.original_value,
+                        entry.display.original_value,
+                    )
+                    for entry in self.entries
+                ],
+                # The list of subsets
+                [
+                    (
+                        # The name
+                        subset_name,
+                        # The list of constants to use in this subset
+                        [
+                            c.original_value
+                            for c in  getattr(self, subset_name).constants.keys()
+                        ]
+                    )
+                    for subset_name in self.subsets
+                ],
+                # Extra kwargs to pass to ``__ini__``
+                {
+                    'dict_class': self.dict_class,
+                    'retro_compatibility': self.retro_compatibility,
+                    'mutable': self._mutable,
+                }
+            )
+        )
+
+def create_choice(klass, choices, subsets, kwargs):
+    """Create an instance of a ``Choices`` object.
+
+    Parameters
+    ----------
+    klass : type
+        The class to use to recreate the object.
+    choices : list(tuple)
+        A list of choices as expected by the ``__init__`` method of ``klass``.
+    subsets : list(tuple)
+        A tuple with an entry for each subset to create. Each entry is a list with two entries:
+        - the name of the subsets
+        - a list of the constants to use for this subset
+    kwargs : dict
+        Extra parameters expected on the ``__init__`` method of ``klass``.
+
+    Returns
+    -------
+    Choices
+        A new instance of ``Choices`` (or other class defined in ``klass``).
+
+    """
+
+    obj = klass(*choices, **kwargs)
+    for subset in subsets:
+        obj.add_subset(*subset)
+    return obj
 
 
 if __name__ == '__main__':

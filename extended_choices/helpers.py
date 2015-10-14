@@ -13,6 +13,11 @@ from __future__ import unicode_literals
 
 from builtins import object
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from django.utils.functional import Promise
 
 
@@ -35,6 +40,11 @@ class ChoiceAttributeMixin(object):
         Returns the choice field holding the value of the attached ``ChoiceEntry``.
     display : property
         Returns the choice field holding the display name of the attached ``ChoiceEntry``.
+    original_type : type (class attribute)
+        The class of the value used to create a new class.
+    creator_type : type
+        The class that created a new class. Will be ``ChoiceAttributeMixin`` except if it was
+        overridden by the author.
 
     Example
     -------
@@ -76,7 +86,6 @@ class ChoiceAttributeMixin(object):
             return super(ChoiceAttributeMixin, cls).__new__(cls)
 
         return super(ChoiceAttributeMixin, cls).__new__(cls, *args[:1])
-
 
     def __init__(self, value, choice_entry):
         """Initiate the object to save the value and the choice entry.
@@ -120,6 +129,11 @@ class ChoiceAttributeMixin(object):
         """Property that returns the ``display`` attribute of the attached ``ChoiceEntry``."""
         return self.choice_entry.display
 
+    @property
+    def original_value(self):
+        """Return the original value used to create the current instance."""
+        return self.original_type(self)
+
     @classmethod
     def get_class_for_value(cls, value):
         """Class method to construct a class based on this mixin and the type of the given value.
@@ -136,17 +150,75 @@ class ChoiceAttributeMixin(object):
         """
         type_ = value.__class__
 
+        # Check if the type is already a ``ChoiceAttribute``
+        if issubclass(type_, ChoiceAttributeMixin):
+            # In this case we can return this type
+            return type_
+
         # Create a new class only if it wasn't already created for this type.
         if type_ not in cls._classes_by_type:
             # Compute the name of the class with the name of the type.
             class_name = str('%sChoiceAttribute' % type_.__name__.capitalize())
             # Create a new class and save it in the cache.
-            cls._classes_by_type[type_] = type(class_name, (cls, type_), {})
+            cls._classes_by_type[type_] = type(class_name, (cls, type_), {
+                'original_type': type_,
+                'creator_type': cls,
+            })
 
         # Return the class from the cache based on the type.
         return cls._classes_by_type[type_]
 
+    def __reduce__(self):
+        """Reducer to make the auto-created classes picklable.
+
+        Returns
+        -------
+        tuple
+            A tuple as expected by pickle, to recreate the object when calling ``pickle.loads``:
+            1. a callable to recreate the object
+            2. a tuple with all positioned arguments expected by this callable
+
+        """
+
+        return (
+            # Function to create a choice attribute
+            create_choice_attribute,
+            (
+                # The class that created the class of the current value
+                self.creator_type,
+                # The original type of the current value
+                self.original_value,
+                # The tied `choice_entry`
+                self.choice_entry
+            )
+        )
+
     _classes_by_type = {}
+
+
+def create_choice_attribute(creator_type, value, choice_entry):
+    """Create an instance of a subclass of ChoiceAttributeMixin for the given value.
+
+    Parameters
+    ----------
+    creator_type : type
+        ``ChoiceAttributeMixin`` or a subclass, from which we'll call the ``get_class_for_value``
+        class-method.
+    value : ?
+        The value for which we want to create an instance of a new subclass of ``creator_type``.
+    choice_entry: ChoiceEntry
+        The ``ChoiceEntry`` instance that hold the current value, used to access its constant,
+        value and display name.
+
+    Returns
+    -------
+    ChoiceAttributeMixin
+        An instance of a subclass of ``creator_type`` for the given value
+
+    """
+
+    klass = creator_type.get_class_for_value(value)
+    return klass(value, choice_entry)
 
 
 class ChoiceEntry(tuple):
@@ -243,5 +315,4 @@ class ChoiceEntry(tuple):
             raise ValueError('Using `None` in a `Choices` object is not supported. You may '
                              'use an empty string.')
 
-        klass = self.ChoiceAttributeMixin.get_class_for_value(value)
-        return klass(value, self)
+        return create_choice_attribute(self.ChoiceAttributeMixin, value, self)

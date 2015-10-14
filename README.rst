@@ -260,6 +260,8 @@ You can also pass the ``argument`` to the ``Choices`` constructor to create a su
 the choices entries added at the same time (it will call ``add_choices`` with the name and the
 entries)
 
+The list of existing subset names is in the ``subsets`` attributes of the parent ``Choicess`` object.
+
 Notes
 -----
 
@@ -381,7 +383,7 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 .. _Github: https://github.com/twidi/django-extended-choices
 .. _Django matrix: https://docs.djangoproject.com/en/1.8/faq/install/#what-python-version-can-i-use-with-django
 .. _TravisCi: https://travis-ci.org/twidi/django-extended-choices/pull_requests
-.. _RedTheDoc: http://django-extended-choices.readthedocs.org
+.. _ReadTheDoc: http://django-extended-choices.readthedocs.org
 .. _BSD: http://opensource.org/licenses/BSD-3-Clause
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/django-extended-choices.png
