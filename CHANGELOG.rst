@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Release *v1.0.5* - ``2015-10-14``
+---------------------------------
+* add compatibility with the  ``pickle`` module
+
 Release *v1.0.4* - ``2015-05-05``
 ---------------------------------
 * explicitly raise ``ValueError`` when using ``None`` for constant, value or display name.
