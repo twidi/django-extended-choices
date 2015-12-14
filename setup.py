@@ -6,6 +6,7 @@ from os.path import abspath, dirname, join
 from setuptools import setup, find_packages
 import sys
 
+
 def read_relative_file(filename):
     """Returns contents of the given file, which path is supposed relative
     to this module."""
@@ -29,7 +30,7 @@ setup(
     install_requires=install_requires,
     packages=find_packages(),
     include_package_data=True,
-    extras_require= {
+    extras_require={
         'dev': ['django'],
         'makedoc': ['django', 'sphinx', 'sphinxcontrib-napoleon', 'sphinx_rtd_theme'],
     },
