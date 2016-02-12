@@ -40,8 +40,8 @@ class ChoiceAttributeMixin(object):
         Returns the choice field holding the value of the attached ``ChoiceEntry``.
     display : property
         Returns the choice field holding the display name of the attached ``ChoiceEntry``.
-    original_type : type (class attribute)
-        The class of the value used to create a new class.
+    original_value : ?
+        The value used to create the current instance.
     creator_type : type
         The class that created a new class. Will be ``ChoiceAttributeMixin`` except if it was
         overridden by the author.
@@ -112,6 +112,7 @@ class ChoiceAttributeMixin(object):
         else:
             super(ChoiceAttributeMixin, self).__init__()
 
+        self.original_value = value
         self.choice_entry = choice_entry
 
     @property
@@ -128,11 +129,6 @@ class ChoiceAttributeMixin(object):
     def display(self):
         """Property that returns the ``display`` attribute of the attached ``ChoiceEntry``."""
         return self.choice_entry.display
-
-    @property
-    def original_value(self):
-        """Return the original value used to create the current instance."""
-        return self.original_type(self)
 
     @classmethod
     def get_class_for_value(cls, value):
@@ -161,7 +157,6 @@ class ChoiceAttributeMixin(object):
             class_name = str('%sChoiceAttribute' % type_.__name__.capitalize())
             # Create a new class and save it in the cache.
             cls._classes_by_type[type_] = type(class_name, (cls, type_), {
-                'original_type': type_,
                 'creator_type': cls,
             })
 

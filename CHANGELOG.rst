@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Release *v1.0.6* - ``2016-02-12``
+---------------------------------
+* add compatibility with "display" values set using ``ugettext_lazy``
+
 Release *v1.0.5* - ``2015-10-14``
 ---------------------------------
 * add compatibility with the  ``pickle`` module
