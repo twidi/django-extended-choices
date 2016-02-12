@@ -14,6 +14,7 @@ The documentation format in this file is numpydoc_.
 from __future__ import unicode_literals
 
 import os, sys
+from copy import copy, deepcopy
 
 try:
     import cPickle as pickle
@@ -38,6 +39,7 @@ from django.conf import settings
 settings.configure(DATABASE_ENGINE='sqlite3')
 
 from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy
 
 from .choices import Choices
 from .fields import NamedExtendedChoiceFormField
@@ -924,13 +926,13 @@ class OldChoicesTestCase(BaseTestCase):
         self.assertEqual(unpickled_entry.value, 1)
 
     def test_pickle_choice(self):
-        """Test that a choice object could be pickled and unpickled."""
+        """Test that a choices object could be pickled and unpickled."""
 
         # Simple choice
-        pickled_choice = pickle.dumps(self.MY_CHOICES)
-        unpickled_choice = pickle.loads(pickled_choice)
+        pickled_choices = pickle.dumps(self.MY_CHOICES)
+        unpickled_choices = pickle.loads(pickled_choices)
 
-        self.assertEqual(unpickled_choice, self.MY_CHOICES)
+        self.assertEqual(unpickled_choices, self.MY_CHOICES)
 
         # With a name, extra arguments and subsets
         OTHER_CHOICES = Choices(
@@ -945,18 +947,40 @@ class OldChoicesTestCase(BaseTestCase):
         OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
         OTHER_CHOICES.add_subset("EVEN", ("TWO", ))
 
-        pickled_choice = pickle.dumps(OTHER_CHOICES)
-        unpickled_choice = pickle.loads(pickled_choice)
+        pickled_choices = pickle.dumps(OTHER_CHOICES)
+        unpickled_choices = pickle.loads(pickled_choices)
 
-        self.assertEqual(unpickled_choice, OTHER_CHOICES)
-        self.assertEqual(unpickled_choice.dict_class, OrderedDict)
-        self.assertFalse(unpickled_choice.retro_compatibility)
-        self.assertFalse(unpickled_choice._mutable)
-        self.assertEqual(unpickled_choice.subsets, OTHER_CHOICES.subsets)
-        self.assertEqual(unpickled_choice.ALL, OTHER_CHOICES.ALL)
-        self.assertEqual(unpickled_choice.ODD, OTHER_CHOICES.ODD)
-        self.assertEqual(unpickled_choice.EVEN, OTHER_CHOICES.EVEN)
+        self.assertEqual(unpickled_choices, OTHER_CHOICES)
+        self.assertEqual(unpickled_choices.dict_class, OrderedDict)
+        self.assertFalse(unpickled_choices.retro_compatibility)
+        self.assertFalse(unpickled_choices._mutable)
+        self.assertEqual(unpickled_choices.subsets, OTHER_CHOICES.subsets)
+        self.assertEqual(unpickled_choices.ALL, OTHER_CHOICES.ALL)
+        self.assertEqual(unpickled_choices.ODD, OTHER_CHOICES.ODD)
+        self.assertEqual(unpickled_choices.EVEN, OTHER_CHOICES.EVEN)
 
+    def test_django_ugettext_lazy(self):
+        """Test that a choices object using ugettext_lazy could be pickled and copied."""
+
+        lazy_choices = Choices(
+            ('ONE', 1, ugettext_lazy('One for the money')),
+            ('TWO', 2, ugettext_lazy('Two for the show')),
+            ('THREE', 3, ugettext_lazy('Three to get ready')),
+        )
+
+        # try to pickel it, it should not raise
+        pickled_choices = pickle.dumps(lazy_choices)
+        unpickled_choices = pickle.loads(pickled_choices)
+
+        self.assertEqual(unpickled_choices, lazy_choices)
+
+        # try to copy it, it should not raise
+        copied_choices = copy(lazy_choices)
+        self.assertEqual(copied_choices, lazy_choices)
+
+        # try to deep-copy it, it should not raise
+        deep_copied_choices = deepcopy(lazy_choices)
+        self.assertEqual(deep_copied_choices, lazy_choices)
 
 
 if __name__ == "__main__":
