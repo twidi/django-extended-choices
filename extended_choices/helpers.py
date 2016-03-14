@@ -188,6 +188,10 @@ class ChoiceAttributeMixin(object):
             )
         )
 
+    def __bool__(self):
+        """Use the original value to know if the value is truely of falsy"""
+        return bool(self.original_value)
+
     _classes_by_type = {}
 
 

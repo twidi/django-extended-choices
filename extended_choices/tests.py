@@ -982,6 +982,26 @@ class OldChoicesTestCase(BaseTestCase):
         deep_copied_choices = deepcopy(lazy_choices)
         self.assertEqual(deep_copied_choices, lazy_choices)
 
+    def test_bool(self):
+        """Test that having 0 or "" return `False` in a boolean context"""
+
+        bool_choices = Choices(
+            ('', 0, ''),
+            ('FOO', 1, 'bar'),
+        )
+
+        first = bool_choices.for_value(0)
+        second = bool_choices.for_value(1)
+
+        self.assertFalse(first.constant)
+        self.assertFalse(first.value)
+        self.assertFalse(first.display)
+
+        self.assertTrue(second.constant)
+        self.assertTrue(second.value)
+        self.assertTrue(second.display)
+
+
 
 if __name__ == "__main__":
     unittest.main()
