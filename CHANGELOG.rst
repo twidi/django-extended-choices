@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Release *v1.0.7* - ``2016-03-13``
+---------------------------------
+* ensure falsy values are considered as so
+
 Release *v1.0.6* - ``2016-02-12``
 ---------------------------------
 * add compatibility with "display" values set using ``ugettext_lazy``

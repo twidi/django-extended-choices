@@ -19,7 +19,7 @@ if sys.version_info < (2, 7):
 
 setup(
     name="django-extended-choices",
-    version="1.0.6",
+    version="1.0.7",
     license="BSD",
     description="Little helper application to improve django choices"
     "(for fields)",
