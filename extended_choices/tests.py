@@ -473,6 +473,8 @@ class ChoicesTestCase(BaseTestCase):
     def test__contains__(self):
         """Test the ``__contains__`` method."""
 
+        self.assertIn(self.MY_CHOICES.ONE, self.MY_CHOICES)
+        self.assertTrue(self.MY_CHOICES.__contains__(self.MY_CHOICES.ONE))
         self.assertIn(1, self.MY_CHOICES)
         self.assertTrue(self.MY_CHOICES.__contains__(1))
         self.assertIn(3, self.MY_CHOICES)
@@ -535,6 +537,107 @@ class ChoicesTestCase(BaseTestCase):
         self.assertEqual(choices.displays[_('two')].value, 2)
 
         return
+
+    def test_pickle_choice_attribute(self):
+        """Test that a choice attribute could be pickled and unpickled."""
+
+        value = self.MY_CHOICES.ONE
+
+        pickled_value = pickle.dumps(value)
+        unpickled_value = pickle.loads(pickled_value)
+
+        self.assertEqual(unpickled_value, value)
+        self.assertEqual(unpickled_value.choice_entry, value.choice_entry)
+        self.assertEqual(unpickled_value.constant, 'ONE')
+        self.assertEqual(unpickled_value.display, 'One for the money')
+        self.assertEqual(unpickled_value.value, 1)
+
+    def test_pickle_choice_entry(self):
+        """Test that a choice entry could be pickled and unpickled."""
+
+        entry = self.MY_CHOICES.ONE.choice_entry
+
+        pickled_entry = pickle.dumps(entry)
+        unpickled_entry = pickle.loads(pickled_entry)
+
+        self.assertEqual(unpickled_entry, entry)
+        self.assertEqual(unpickled_entry.constant, 'ONE')
+        self.assertEqual(unpickled_entry.display, 'One for the money')
+        self.assertEqual(unpickled_entry.value, 1)
+
+    def test_pickle_choice(self):
+        """Test that a choices object could be pickled and unpickled."""
+
+        # Simple choice
+        pickled_choices = pickle.dumps(self.MY_CHOICES)
+        unpickled_choices = pickle.loads(pickled_choices)
+
+        self.assertEqual(unpickled_choices, self.MY_CHOICES)
+
+        # With a name, extra arguments and subsets
+        OTHER_CHOICES = Choices(
+            'ALL',
+            ('ONE', 1, 'One for the money'),
+            ('TWO', 2, 'Two for the show'),
+            ('THREE', 3, 'Three to get ready'),
+            dict_class = OrderedDict,
+            mutable=False
+        )
+        OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
+        OTHER_CHOICES.add_subset("EVEN", ("TWO", ))
+
+        pickled_choices = pickle.dumps(OTHER_CHOICES)
+        unpickled_choices = pickle.loads(pickled_choices)
+
+        self.assertEqual(unpickled_choices, OTHER_CHOICES)
+        self.assertEqual(unpickled_choices.dict_class, OrderedDict)
+        self.assertFalse(unpickled_choices._mutable)
+        self.assertEqual(unpickled_choices.subsets, OTHER_CHOICES.subsets)
+        self.assertEqual(unpickled_choices.ALL, OTHER_CHOICES.ALL)
+        self.assertEqual(unpickled_choices.ODD, OTHER_CHOICES.ODD)
+        self.assertEqual(unpickled_choices.EVEN, OTHER_CHOICES.EVEN)
+
+    def test_django_ugettext_lazy(self):
+        """Test that a choices object using ugettext_lazy could be pickled and copied."""
+
+        lazy_choices = Choices(
+            ('ONE', 1, ugettext_lazy('One for the money')),
+            ('TWO', 2, ugettext_lazy('Two for the show')),
+            ('THREE', 3, ugettext_lazy('Three to get ready')),
+        )
+
+        # try to pickel it, it should not raise
+        pickled_choices = pickle.dumps(lazy_choices)
+        unpickled_choices = pickle.loads(pickled_choices)
+
+        self.assertEqual(unpickled_choices, lazy_choices)
+
+        # try to copy it, it should not raise
+        copied_choices = copy(lazy_choices)
+        self.assertEqual(copied_choices, lazy_choices)
+
+        # try to deep-copy it, it should not raise
+        deep_copied_choices = deepcopy(lazy_choices)
+        self.assertEqual(deep_copied_choices, lazy_choices)
+
+    def test_bool(self):
+        """Test that having 0 or "" return `False` in a boolean context"""
+
+        bool_choices = Choices(
+            ('', 0, ''),
+            ('FOO', 1, 'bar'),
+        )
+
+        first = bool_choices.for_value(0)
+        second = bool_choices.for_value(1)
+
+        self.assertFalse(first.constant)
+        self.assertFalse(first.value)
+        self.assertFalse(first.display)
+
+        self.assertTrue(second.constant)
+        self.assertTrue(second.value)
+        self.assertTrue(second.display)
 
 
 class ChoiceAttributeMixinTestCase(BaseTestCase):
@@ -734,273 +837,6 @@ class ChoiceEntryTestCase(BaseTestCase):
 
         with self.assertRaises(ValueError):
             ChoiceEntry(('FOO', None, 'foo'))
-
-
-class OldChoicesTestCase(BaseTestCase):
-    """Test of tje ``Choices`` implementation as defined on version 0.4.1, for retro-compatibility.
-
-    Existing tests from this old version are untouched, but some checks where added, as well
-    as comments and spacing.
-
-    """
-
-    def test_attributes_and_keys(self):
-        """Test that constants cab be accessed either by attribute or key."""
-
-        self.assertEqual(self.MY_CHOICES.ONE, self.MY_CHOICES['ONE'])
-
-        with self.assertRaises(AttributeError):
-            self.MY_CHOICES.FORTY_TWO
-
-        with self.assertRaises(KeyError):
-            self.MY_CHOICES['FORTY_TWO']
-
-        # Key access should work for all attributes.
-        self.assertEqual(self.MY_CHOICES.CHOICES, self.MY_CHOICES['CHOICES'])
-
-    def test_simple_choice(self):
-        """Test all ways to access data on a ``Choices`` object."""
-
-        self.assertEqual(self.MY_CHOICES,(
-            (1, "One for the money"),
-            (2, "Two for the show"),
-            (3, "Three to get ready"),
-        ))
-
-        # Equivalent to above.
-        self.assertEqual(self.MY_CHOICES.CHOICES,(
-            (1, "One for the money"),
-            (2, "Two for the show"),
-            (3, "Three to get ready"),
-        ))
-
-        # Get display strings from their values.
-        self.assertEqual(self.MY_CHOICES.CHOICES_DICT, {
-            1: 'One for the money',
-            2: 'Two for the show',
-            3: 'Three to get ready'
-        })
-
-        # Get values from their display strings.
-        self.assertEqual(self.MY_CHOICES.REVERTED_CHOICES_DICT,{
-            'One for the money': 1,
-            'Three to get ready': 3,
-            'Two for the show': 2
-        })
-
-        # Get values from their constant names.
-        self.assertEqual(self.MY_CHOICES.CHOICES_CONST_DICT,{
-            'ONE': 1,
-            'TWO': 2,
-            'THREE': 3
-        })
-
-        # Get constant names from their values.
-        self.assertEqual(self.MY_CHOICES.REVERTED_CHOICES_CONST_DICT, {
-            1: 'ONE',
-            2: 'TWO',
-            3: 'THREE'
-        })
-
-    def test__contains__(self):
-        """Test the ``__contains__`` method.
-
-        Should return ``True`` if a given value is in the `Choices`` object.
-
-        """
-
-        self.assertTrue(self.MY_CHOICES.ONE in self.MY_CHOICES)
-        self.assertTrue(1 in self.MY_CHOICES)
-        self.assertFalse(42 in self.MY_CHOICES)
-
-    def test__iter__(self):
-        """Test the ``__iter__`` method.
-
-        Each iteration should return a tuple with value and display string.
-
-        """
-
-        self.assertEqual([c for c in self.MY_CHOICES], [
-            (1, 'One for the money'),
-            (2, 'Two for the show'),
-            (3, 'Three to get ready'),
-        ])
-
-    def test_subset(self):
-        """Test the ``add_subset`` method."""
-
-        self.assertEqual(self.MY_CHOICES.ODD,(
-            (1, 'One for the money'),
-            (3, 'Three to get ready')
-        ))
-        self.assertEqual(self.MY_CHOICES.ODD_CONST_DICT, {'ONE': 1, 'THREE': 3})
-
-    def test_unique_values(self):
-        """Test that an exception is raised when constants with the same value are added."""
-
-        with self.assertRaises(ValueError):
-            Choices(('TWO', 4, 'Deux'), ('FOUR', 4, 'Quatre'))
-
-    def test_unique_constants(self):
-        """Test that an exception is raised when constants with the same name are added."""
-
-        with self.assertRaises(ValueError):
-            Choices(('TWO', 2, 'Deux'), ('TWO', 4, 'Quatre'))
-
-    def test_retrocompatibility(self):
-        """Test that features introduced in the very first version are still working."""
-
-        # Passing a name on the constructor should create a first subset with all values.
-        OTHER_CHOICES = Choices(
-            ('TWO', 2, 'Deux'),
-            ('FOUR', 4, 'Quatre'),
-            name="EVEN"
-        )
-
-        # ``add_choices`` will add some choices and set them in a new subset.
-        OTHER_CHOICES.add_choices("ODD",
-            ('ONE', 1, 'Un'),
-            ('THREE', 3, 'Trois'),
-        )
-        self.assertEqual(OTHER_CHOICES.CHOICES, (
-            (2, 'Deux'),
-            (4, 'Quatre'),
-            (1, 'Un'),
-            (3, 'Trois')
-        ))
-        self.assertEqual(OTHER_CHOICES.ODD, ((1, 'Un'), (3, 'Trois')))
-        self.assertEqual(OTHER_CHOICES.EVEN, ((2, 'Deux'), (4, 'Quatre')))
-
-    def test_dict_class(self):
-        """Test that the dict class to use can be set on the constructor."""
-
-        OTHER_CHOICES = Choices(
-            ('ONE', 1, 'One for the money'),
-            ('TWO', 2, 'Two for the show'),
-            ('THREE', 3, 'Three to get ready'),
-            dict_class = OrderedDict
-        )
-        OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
-
-        # Check that all dict attributes are from the correct class.
-        for attr in (
-                # normal choice
-                'CHOICES_DICT',
-                'REVERTED_CHOICES_DICT',
-                'CHOICES_CONST_DICT',
-                'REVERTED_CHOICES_CONST_DICT',
-                # subset
-                'ODD_DICT',
-                'REVERTED_ODD_DICT',
-                'ODD_CONST_DICT',
-                'REVERTED_ODD_CONST_DICT',
-            ):
-            self.assertFalse(isinstance(getattr(self.MY_CHOICES, attr), OrderedDict))
-            self.assertTrue(isinstance(getattr(OTHER_CHOICES, attr), OrderedDict))
-
-    def test_pickle_choice_attribute(self):
-        """Test that a choice attribute could be pickled and unpickled."""
-
-        value = self.MY_CHOICES.ONE
-
-        pickled_value = pickle.dumps(value)
-        unpickled_value = pickle.loads(pickled_value)
-
-        self.assertEqual(unpickled_value, value)
-        self.assertEqual(unpickled_value.choice_entry, value.choice_entry)
-        self.assertEqual(unpickled_value.constant, 'ONE')
-        self.assertEqual(unpickled_value.display, 'One for the money')
-        self.assertEqual(unpickled_value.value, 1)
-
-    def test_pickle_choice_entry(self):
-        """Test that a choice entry could be pickled and unpickled."""
-
-        entry = self.MY_CHOICES.ONE.choice_entry
-
-        pickled_entry = pickle.dumps(entry)
-        unpickled_entry = pickle.loads(pickled_entry)
-
-        self.assertEqual(unpickled_entry, entry)
-        self.assertEqual(unpickled_entry.constant, 'ONE')
-        self.assertEqual(unpickled_entry.display, 'One for the money')
-        self.assertEqual(unpickled_entry.value, 1)
-
-    def test_pickle_choice(self):
-        """Test that a choices object could be pickled and unpickled."""
-
-        # Simple choice
-        pickled_choices = pickle.dumps(self.MY_CHOICES)
-        unpickled_choices = pickle.loads(pickled_choices)
-
-        self.assertEqual(unpickled_choices, self.MY_CHOICES)
-
-        # With a name, extra arguments and subsets
-        OTHER_CHOICES = Choices(
-            'ALL',
-            ('ONE', 1, 'One for the money'),
-            ('TWO', 2, 'Two for the show'),
-            ('THREE', 3, 'Three to get ready'),
-            dict_class = OrderedDict,
-            retro_compatibility=False,
-            mutable=False
-        )
-        OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
-        OTHER_CHOICES.add_subset("EVEN", ("TWO", ))
-
-        pickled_choices = pickle.dumps(OTHER_CHOICES)
-        unpickled_choices = pickle.loads(pickled_choices)
-
-        self.assertEqual(unpickled_choices, OTHER_CHOICES)
-        self.assertEqual(unpickled_choices.dict_class, OrderedDict)
-        self.assertFalse(unpickled_choices.retro_compatibility)
-        self.assertFalse(unpickled_choices._mutable)
-        self.assertEqual(unpickled_choices.subsets, OTHER_CHOICES.subsets)
-        self.assertEqual(unpickled_choices.ALL, OTHER_CHOICES.ALL)
-        self.assertEqual(unpickled_choices.ODD, OTHER_CHOICES.ODD)
-        self.assertEqual(unpickled_choices.EVEN, OTHER_CHOICES.EVEN)
-
-    def test_django_ugettext_lazy(self):
-        """Test that a choices object using ugettext_lazy could be pickled and copied."""
-
-        lazy_choices = Choices(
-            ('ONE', 1, ugettext_lazy('One for the money')),
-            ('TWO', 2, ugettext_lazy('Two for the show')),
-            ('THREE', 3, ugettext_lazy('Three to get ready')),
-        )
-
-        # try to pickel it, it should not raise
-        pickled_choices = pickle.dumps(lazy_choices)
-        unpickled_choices = pickle.loads(pickled_choices)
-
-        self.assertEqual(unpickled_choices, lazy_choices)
-
-        # try to copy it, it should not raise
-        copied_choices = copy(lazy_choices)
-        self.assertEqual(copied_choices, lazy_choices)
-
-        # try to deep-copy it, it should not raise
-        deep_copied_choices = deepcopy(lazy_choices)
-        self.assertEqual(deep_copied_choices, lazy_choices)
-
-    def test_bool(self):
-        """Test that having 0 or "" return `False` in a boolean context"""
-
-        bool_choices = Choices(
-            ('', 0, ''),
-            ('FOO', 1, 'bar'),
-        )
-
-        first = bool_choices.for_value(0)
-        second = bool_choices.for_value(1)
-
-        self.assertFalse(first.constant)
-        self.assertFalse(first.value)
-        self.assertFalse(first.display)
-
-        self.assertTrue(second.constant)
-        self.assertTrue(second.value)
-        self.assertTrue(second.display)
-
 
 
 if __name__ == "__main__":

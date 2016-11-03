@@ -91,9 +91,6 @@ class Choices(list):
     dict_class : type, optional
         ``dict`` by default, it's the dict class to use to create dictionnaries (``constants``,
         ``values`` and ``displays``. Could be set for example to ``OrderedSet``.
-    retro_compatibility : boolean, optional
-        ``True`` by default, it makes the ``Choices`` object compatible with version < 1.
-        If set to ``False``, all the attributes created for this purpose wont be created.
 
     Example
     -------
@@ -203,20 +200,6 @@ class Choices(list):
         self.constants = self.dict_class()
         self.values = self.dict_class()
         self.displays = self.dict_class()
-
-        # Will be removed one day. See the "compatibility" section in the documentation.
-        self.retro_compatibility = kwargs.get('retro_compatibility', True)
-        if self.retro_compatibility:
-            # Hold the list of tuples as expected by django.
-            self.CHOICES = tuple()
-            # To get  display strings from their values.
-            self.CHOICES_DICT = self.dict_class()
-            # To get values from their display strings.
-            self.REVERTED_CHOICES_DICT = self.dict_class()
-            # To get values from their constant names.
-            self.CHOICES_CONST_DICT = self.dict_class()
-            # To get constant names from their values.
-            self.REVERTED_CHOICES_CONST_DICT = self.dict_class()
 
         # For now this instance is mutable: we need to add the given choices.
         self._mutable = True
@@ -368,24 +351,8 @@ class Choices(list):
             self.values[choice_entry.value] = choice_entry
             self.displays[choice_entry.display] = choice_entry
 
-            # Will be removed one day. See the "compatibility" section in the documentation.
-            if self.retro_compatibility:
-                # To get  display strings from their values.
-                self.CHOICES_DICT[choice_entry.value] = choice_entry.display
-                # To get values from their display strings.
-                self.REVERTED_CHOICES_DICT[choice_entry.display] = choice_entry.value
-                # To get values from their constant names.
-                self.CHOICES_CONST_DICT[choice_entry.constant] = choice_entry.value
-                # To get constant names from their values.
-                self.REVERTED_CHOICES_CONST_DICT[choice_entry.value] = choice_entry.constant
-
-        # Will be removed one day. See the "compatibility" section in the documentation.
-        if self.retro_compatibility:
-            # Hold the list of tuples as expected by django.
-            self.CHOICES = self.choices
-
         # If we have a subset name, create a new subset with all the given constants.
-        if subset_name and (not self.retro_compatibility or subset_name != 'CHOICES'):
+        if subset_name:
             self.add_subset(subset_name, constants)
 
     def add_subset(self, name, constants):
@@ -460,36 +427,12 @@ class Choices(list):
         subset = self.__class__(
             *choice_entries, **{
             'dict_class': self.dict_class,
-            'retro_compatibility': self.retro_compatibility,
             'mutable': False,
         })
 
         # Make the subset accessible via an attribute.
         setattr(self, name, subset)
         self.subsets.append(name)
-
-        # Will be removed one day. See the "compatibility" section in the documentation.
-        if self.retro_compatibility:
-            # To get  display strings from their values.
-            SUBSET_DICT = self.dict_class()
-            # To get values from their display strings.
-            REVERTED_SUBSET_DICT = self.dict_class()
-            # To get values from their constant names.
-            SUBSET_CONST_DICT = self.dict_class()
-            # To get constant names from their values.
-            REVERTED_SUBSET_CONST_DICT = self.dict_class()
-
-            for choice_entry in choice_entries:
-                SUBSET_DICT[choice_entry.value] = choice_entry.display
-                REVERTED_SUBSET_DICT[choice_entry.display] = choice_entry.value
-                SUBSET_CONST_DICT[choice_entry.constant] = choice_entry.value
-                REVERTED_SUBSET_CONST_DICT[choice_entry.value] = choice_entry.constant
-
-            # Prefix each quick-access dict by the name of the subset
-            setattr(self, '%s_DICT' % name, SUBSET_DICT)
-            setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_SUBSET_DICT)
-            setattr(self, '%s_CONST_DICT' % name, SUBSET_CONST_DICT)
-            setattr(self, 'REVERTED_%s_CONST_DICT' % name, REVERTED_SUBSET_CONST_DICT)
 
     def for_constant(self, constant):
         """Returns the ``ChoiceEntry`` for the given constant.
@@ -813,7 +756,6 @@ class Choices(list):
                 # Extra kwargs to pass to ``__ini__``
                 {
                     'dict_class': self.dict_class,
-                    'retro_compatibility': self.retro_compatibility,
                     'mutable': self._mutable,
                 }
             )
