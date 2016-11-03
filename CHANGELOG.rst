@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Release *v1.1.1* - ``2016-11-03``
+---------------------------------
+* make ``OrderedChoices`` available at the package root
+
 Release *v1.1* - ``2016-11-03``
 -------------------------------
 * add the ``extract_subset`` method
