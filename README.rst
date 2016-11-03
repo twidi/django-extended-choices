@@ -178,6 +178,9 @@ If you want these dicts to be ordered, you can pass the dict class to use to the
         dict_class = OrderedDict
     )
 
+Since version ``1.1``, the new ``OrderedChoices`` class is provided, that is exactly that:
+a ``Choices`` using ``OrderedDict`` by default for ``dict_class``.
+
 You can check if a constant, value, or display name exists:
 
 .. code-block:: python

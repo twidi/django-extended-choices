@@ -42,7 +42,7 @@ from django.core.exceptions import ValidationError
 from django.utils.functional import Promise
 from django.utils.translation import ugettext_lazy
 
-from .choices import Choices
+from .choices import Choices, OrderedChoices
 from .fields import NamedExtendedChoiceFormField
 from .helpers import ChoiceAttributeMixin, ChoiceEntry
 
@@ -682,6 +682,40 @@ class ChoicesTestCase(BaseTestCase):
         self.assertTrue(second.constant)
         self.assertTrue(second.value)
         self.assertTrue(second.display)
+
+    def test_dict_class(self):
+        """Test that the dict_class argument is taken into account"""
+
+        dict_choices = Choices(
+            ('FOO', 1, 'foo'),
+            ('BAR', 2, 'bar')
+        )
+
+        self.assertIs(dict_choices.dict_class, dict)
+        self.assertIsInstance(dict_choices.constants, dict)
+        self.assertIsInstance(dict_choices.values, dict)
+        self.assertIsInstance(dict_choices.displays, dict)
+
+        ordered_dict_choices = Choices(
+            ('FOO', 1, 'foo'),
+            ('BAR', 2, 'bar'),
+            dict_class=OrderedDict
+        )
+
+        self.assertIs(ordered_dict_choices.dict_class, OrderedDict)
+        self.assertIsInstance(ordered_dict_choices.constants, OrderedDict)
+        self.assertIsInstance(ordered_dict_choices.values, OrderedDict)
+        self.assertIsInstance(ordered_dict_choices.displays, OrderedDict)
+
+        ordered_choices = OrderedChoices(
+            ('FOO', 1, 'foo'),
+            ('BAR', 2, 'bar'),
+        )
+
+        self.assertIs(ordered_choices.dict_class, OrderedDict)
+        self.assertIsInstance(ordered_choices.constants, OrderedDict)
+        self.assertIsInstance(ordered_choices.values, OrderedDict)
+        self.assertIsInstance(ordered_choices.displays, OrderedDict)
 
 
 class ChoiceAttributeMixinTestCase(BaseTestCase):

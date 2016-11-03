@@ -60,7 +60,13 @@ The documentation format in this file is numpydoc_.
 
 from __future__ import unicode_literals
 
+import sys
 from past.builtins import basestring
+
+if sys.version_info >= (2, 7):
+    from collections import OrderedDict
+else:
+    from django.utils.datastructures import SortedDict as OrderedDict
 
 from .helpers import ChoiceEntry
 
@@ -90,18 +96,13 @@ class Choices(list):
         construct your ``Choices`` instance with many calls to ``add_choices``.
     dict_class : type, optional
         ``dict`` by default, it's the dict class to use to create dictionaries (``constants``,
-        ``values`` and ``displays``. Could be set for example to ``OrderedSet``.
+        ``values`` and ``displays``. Could be set for example to ``OrderedDict`` (you can use
+        ``OrderedChoices`` that is a simple subclass using ``OrderedDict``.
 
     Example
     -------
 
     Start by declaring your ``Choices``:
-
-    >>> import sys
-    >>> if sys.version_info >= (2, 7):
-    ...     from collections import OrderedDict
-    ... else:
-    ...     from django.utils.datastructures import SortedDict as OrderedDict
 
     >>> ALIGNMENTS = Choices(
     ...     ('BAD', 10, 'bad'),
@@ -825,6 +826,43 @@ class Choices(list):
                 }
             )
         )
+
+
+class OrderedChoices(Choices):
+    """Simple subclass of ``Choices`` using ``OrderedDict`` as ``dict_class``
+
+    Example
+    -------
+
+    Start by declaring your ``Choices``:
+
+    >>> ALIGNMENTS = OrderedChoices(
+    ...     ('BAD', 10, 'bad'),
+    ...     ('NEUTRAL', 20, 'neutral'),
+    ...     ('CHAOTIC_GOOD', 30, 'chaotic good'),
+    ...     ('GOOD', 40, 'good'),
+    ... )
+
+    >>> ALIGNMENTS.dict_class
+    <class 'collections.OrderedDict'>
+
+    >>> ALIGNMENTS.constants
+    OrderedDict([('BAD', ('BAD', 10, 'bad')), ('NEUTRAL', ('NEUTRAL', 20, 'neutral')), ('CHAOTIC_GOOD', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('GOOD', ('GOOD', 40, 'good'))])
+    >>> ALIGNMENTS.values
+    OrderedDict([(10, ('BAD', 10, 'bad')), (20, ('NEUTRAL', 20, 'neutral')), (30, ('CHAOTIC_GOOD', 30, 'chaotic good')), (40, ('GOOD', 40, 'good'))])
+    >>> ALIGNMENTS.displays
+    OrderedDict([('bad', ('BAD', 10, 'bad')), ('neutral', ('NEUTRAL', 20, 'neutral')), ('chaotic good', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('good', ('GOOD', 40, 'good'))])
+
+    """
+
+    def __init__(self, *choices, **kwargs):
+
+        # Class to use for dicts
+        if 'dict_class' not in kwargs:
+            kwargs['dict_class'] = OrderedDict
+
+        super(OrderedChoices, self).__init__(*choices, **kwargs)
+
 
 
 def create_choice(klass, choices, subsets, kwargs):
