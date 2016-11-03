@@ -62,7 +62,7 @@ from __future__ import unicode_literals
 
 from past.builtins import basestring
 
-from .helpers import ChoiceAttributeMixin, ChoiceEntry
+from .helpers import ChoiceEntry
 
 __all__ = ['Choices']
 
@@ -89,7 +89,7 @@ class Choices(list):
         If set, a subset will be created containing all the constants. It could be used if you
         construct your ``Choices`` instance with many calls to ``add_choices``.
     dict_class : type, optional
-        ``dict`` by default, it's the dict class to use to create dictionnaries (``constants``,
+        ``dict`` by default, it's the dict class to use to create dictionaries (``constants``,
         ``values`` and ``displays``. Could be set for example to ``OrderedSet``.
 
     Example
@@ -242,10 +242,10 @@ class Choices(list):
 
             If the first entry of ``*choices`` is a string, then it will be used as a name for a
             new subset that will contain all the given choices.
-
-        name : string
-            Instead of using the first entry of the ``*choices`` to pass a name of a subset to
-            create, you can pass it via the ``name`` named argument.
+        **kwargs : dict
+            name : string
+                Instead of using the first entry of the ``*choices`` to pass a name of a subset to
+                create, you can pass it via the ``name`` named argument.
 
         Example
         -------
@@ -328,15 +328,14 @@ class Choices(list):
             raise ValueError("You cannot add existing values. "
                              "Existing values: %s." % list(bad_values))
 
-        # We can now add eqch choice.
+        # We can now add each choice.
         for choice_tuple in choices:
 
             # Convert the choice tuple in a ``ChoiceEntry`` instance if it's not already done.
             # It allows to share choice entries between a ``Choices`` instance and its subsets.
-            if not isinstance(choice_tuple, self.ChoiceEntryClass):
-                choice_entry = self.ChoiceEntryClass(choice_tuple)
-            else:
-                choice_entry = choice_tuple
+            choice_entry = choice_tuple
+            if not isinstance(choice_entry, self.ChoiceEntryClass):
+                choice_entry = self.ChoiceEntryClass(choice_entry)
 
             # Append to the main list the choice as expected by django: (value, display name).
             self.append(choice_entry.choice)
@@ -416,10 +415,12 @@ class Choices(list):
         # Also we set ``mutable`` to False to disable the possibility to add new choices to the
         # subset.
         subset = self.__class__(
-            *choice_entries, **{
-            'dict_class': self.dict_class,
-            'mutable': False,
-        })
+            *choice_entries,
+            **{
+                'dict_class': self.dict_class,
+                'mutable': False,
+            }
+        )
 
         return subset
 
@@ -438,7 +439,7 @@ class Choices(list):
         ----------
         name : string
             Name of the attribute that will old the new ``Choices`` instance.
-        constants: list
+        constants: list or tuple
             List of the constants name of this ``Choices`` object to make available in the subset.
 
 
@@ -490,7 +491,6 @@ class Choices(list):
         # Make the subset accessible via an attribute.
         setattr(self, name, subset)
         self.subsets.append(name)
-
 
     def for_constant(self, constant):
         """Returns the ``ChoiceEntry`` for the given constant.
@@ -806,7 +806,7 @@ class Choices(list):
                         # The list of constants to use in this subset
                         [
                             c.original_value
-                            for c in  getattr(self, subset_name).constants.keys()
+                            for c in getattr(self, subset_name).constants.keys()
                         ]
                     )
                     for subset_name in self.subsets
@@ -818,6 +818,7 @@ class Choices(list):
                 }
             )
         )
+
 
 def create_choice(klass, choices, subsets, kwargs):
     """Create an instance of a ``Choices`` object.
@@ -849,6 +850,7 @@ def create_choice(klass, choices, subsets, kwargs):
 
 
 if __name__ == '__main__':
+    # pylint: disable=wrong-import-position,wrong-import-order
     import doctest
     doctest.testmod(report=True)
     from . import helpers

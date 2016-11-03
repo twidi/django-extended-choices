@@ -13,7 +13,7 @@ The documentation format in this file is numpydoc_.
 
 from __future__ import unicode_literals
 
-import os, sys
+import sys
 from copy import copy, deepcopy
 
 try:
@@ -39,6 +39,7 @@ from django.conf import settings
 settings.configure(DATABASE_ENGINE='sqlite3')
 
 from django.core.exceptions import ValidationError
+from django.utils.functional import Promise
 from django.utils.translation import ugettext_lazy
 
 from .choices import Choices
@@ -105,7 +106,7 @@ class FieldsTestCase(BaseTestCase):
             field.clean('FOUR')
         self.assertEqual(raise_context.exception.code, 'non-existing-choice')
 
-        # Shoud fail early if not a string.
+        # Should fail early if not a string.
         with self.assertRaises(ValidationError) as raise_context:
             field.clean(1)
         self.assertEqual(raise_context.exception.code, 'invalid-choice-type')
@@ -113,7 +114,6 @@ class FieldsTestCase(BaseTestCase):
 
 class ChoicesTestCase(BaseTestCase):
     """Test the ``Choices`` class."""
-
 
     def test_should_behave_as_expected_by_django(self):
         """Test that it can be used by django, ie a list of tuple (value, display name)."""
@@ -153,7 +153,6 @@ class ChoicesTestCase(BaseTestCase):
         # Check exception code, only in Django 1.6+
         if django.VERSION >= (1, 6):
             self.assertEqual(raise_context.exception.code, 'invalid_choice')
-
 
     def test_constants_attributes_should_return_values(self):
         """Test that each constant is an attribute returning the value."""
@@ -282,9 +281,9 @@ class ChoicesTestCase(BaseTestCase):
                 (5, '... but Five is not in the song'),
             ))
 
-
         # First test by setting the subset as first argument
-        self.MY_CHOICES.add_choices('EXTENDED',
+        self.MY_CHOICES.add_choices(
+            'EXTENDED',
             ('FOUR', 4, 'And four to go'),
             ('FIVE', 5, '... but Five is not in the song'),
         )
@@ -535,7 +534,6 @@ class ChoicesTestCase(BaseTestCase):
     def test__getitem__(self):
         """Test the ``__getitem__`` method."""
 
-
         # Access to constants.
         self.assertEqual(self.MY_CHOICES['ONE'], 1)
         self.assertEqual(self.MY_CHOICES.__getitem__('ONE'), 1)
@@ -566,25 +564,21 @@ class ChoicesTestCase(BaseTestCase):
     def test_it_should_work_with_django_promises(self):
         """Test that it works with django promises, like ``ugettext_lazy``."""
 
-        import django
-        from django.utils.functional import Promise
-        from django.utils.translation import ugettext_lazy as _
-
-         # Init django, only needed starting from django 1.7
+        # Init django, only needed starting from django 1.7
         if django.VERSION >= (1, 7):
             django.setup()
 
         choices = Choices(
-            ('ONE', 1, _('one')),
-            ('TWO', 2, _('two')),
+            ('ONE', 1, ugettext_lazy('one')),
+            ('TWO', 2, ugettext_lazy('two')),
         )
 
         # Key in ``displays`` dict should be promises
         self.assertIsInstance(list(choices.displays.keys())[0], Promise)
 
         # And that they can be retrieved
-        self.assertTrue(choices.has_display(_('one')))
-        self.assertEqual(choices.displays[_('two')].value, 2)
+        self.assertTrue(choices.has_display(ugettext_lazy('one')))
+        self.assertEqual(choices.displays[ugettext_lazy('two')].value, 2)
 
         return
 
@@ -630,7 +624,7 @@ class ChoicesTestCase(BaseTestCase):
             ('ONE', 1, 'One for the money'),
             ('TWO', 2, 'Two for the show'),
             ('THREE', 3, 'Three to get ready'),
-            dict_class = OrderedDict,
+            dict_class=OrderedDict,
             mutable=False
         )
         OTHER_CHOICES.add_subset("ODD", ("ONE", "THREE"))
@@ -759,7 +753,7 @@ class ChoiceAttributeMixinTestCase(BaseTestCase):
         IntClass = ChoiceAttributeMixin.get_class_for_value(1)
         attr = IntClass(1, self.choice_entry)
 
-        # We should acces the choice entry.
+        # We should access the choice entry.
         self.assertEqual(attr.choice_entry, self.choice_entry)
 
         # And the attributes of the choice entry.
@@ -770,11 +764,7 @@ class ChoiceAttributeMixinTestCase(BaseTestCase):
     def test_it_should_work_with_django_promises(self):
         """Test that it works with django promises, like ``ugettext_lazy``."""
 
-        import django
-        from django.utils.functional import Promise
-        from django.utils.translation import ugettext_lazy
-
-         # Init django, only needed starting from django 1.7
+        # Init django, only needed starting from django 1.7
         if django.VERSION >= (1, 7):
             django.setup()
 
@@ -784,6 +774,7 @@ class ChoiceAttributeMixinTestCase(BaseTestCase):
 
         self.assertIsInstance(attr, Promise)
         self.assertEqual(attr, ugettext_lazy('foo'))
+
 
 class ChoiceEntryTestCase(BaseTestCase):
     """Test the ``ChoiceEntry`` class."""
@@ -865,11 +856,7 @@ class ChoiceEntryTestCase(BaseTestCase):
     def test_it_should_work_with_django_promises(self):
         """Test that ``ChoiceEntry`` class works with django promises, like ``ugettext_lazy``."""
 
-        import django
-        from django.utils.functional import Promise
-        from django.utils.translation import ugettext_lazy
-
-         # Init django, only needed starting from django 1.7
+        # Init django, only needed starting from django 1.7
         if django.VERSION >= (1, 7):
             django.setup()
 

@@ -59,6 +59,3 @@ class NamedExtendedChoiceFormField(forms.Field):
             )
 
         return final
-
-
-

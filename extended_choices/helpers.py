@@ -11,12 +11,7 @@ The documentation format in this file is numpydoc_.
 
 from __future__ import unicode_literals
 
-from builtins import object
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+from builtins import object  # pylint: disable=redefined-builtin
 
 from django.utils.functional import Promise
 
@@ -70,7 +65,7 @@ class ChoiceAttributeMixin(object):
 
     """
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs):  # pylint: disable=unused-argument
         """Construct the object (the other class used with this mixin).
 
         Notes
@@ -108,6 +103,7 @@ class ChoiceAttributeMixin(object):
 
         if isinstance(self, Promise):
             # Special case to manage lazy django stuff like ugettext_lazy
+            # pylint: disable=protected-access
             super(ChoiceAttributeMixin, self).__init__(value._proxy____args, value._proxy____kw)
         else:
             super(ChoiceAttributeMixin, self).__init__()
@@ -189,7 +185,7 @@ class ChoiceAttributeMixin(object):
         )
 
     def __bool__(self):
-        """Use the original value to know if the value is truely of falsy"""
+        """Use the original value to know if the value is truthy of falsy"""
         return bool(self.original_value)
 
     _classes_by_type = {}
@@ -226,7 +222,7 @@ class ChoiceEntry(tuple):
     Expecting a tuple with three entries. (constant, value, display name), it will add three
     attributes to access then: ``constant``, ``value`` and ``display``.
 
-    By passing a dict after these three first entries, in the tuple, it's alose possible to
+    By passing a dict after these three first entries, in the tuple, it's also possible to
     add some other attributes to the ``ChoiceEntry` instance``.
 
     Parameters
@@ -277,6 +273,7 @@ class ChoiceEntry(tuple):
         obj = super(ChoiceEntry, cls).__new__(cls, tuple_[:3])
 
         # Save all special attributes.
+        # pylint: disable=protected-access
         obj.constant = obj._get_choice_attribute(tuple_[0])
         obj.value = obj._get_choice_attribute(tuple_[1])
         obj.display = obj._get_choice_attribute(tuple_[2])
