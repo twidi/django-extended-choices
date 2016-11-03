@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Release *v1.1* - ``2016-11-03``
+-------------------------------
+* add the ``extract_subset`` method
+* add the ``OrderedChoices`` subclass
+* add support for Django 1.10
+* drop retro-compatibility support
+
 Release *v1.0.7* - ``2016-03-13``
 ---------------------------------
 * ensure falsy values are considered as so
