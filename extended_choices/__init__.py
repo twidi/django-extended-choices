@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from .choices import Choices
+from .choices import Choices, OrderedChoices
 
 __author__ = 'Stephane "Twidi" Ange;'
 __contact__ = "s.angel@twidi.com"
