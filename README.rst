@@ -260,7 +260,25 @@ You can also pass the ``argument`` to the ``Choices`` constructor to create a su
 the choices entries added at the same time (it will call ``add_choices`` with the name and the
 entries)
 
-The list of existing subset names is in the ``subsets`` attributes of the parent ``Choicess`` object.
+The list of existing subset names is in the ``subsets`` attributes of the parent ``Choices``
+object.
+
+If you want a subset of the choices but not save it in the original ``Choices`` object, you can
+use ``extract_subset`` instead of ``add_subset``
+
+.. code-block:: python
+
+    >>> subset = STATES.extract_subset('DRAFT', 'OFFLINE')
+    >>> subset
+    (2, 'Draft')
+    (3, 'Offline')
+
+
+As for a subset created by ``add_subset``, you have a real ``Choices`` object, but not accessible
+from the original ``Choices`` object.
+
+Note that in ``extract_subset``, you pass the strings directly, not in a list/tuple as for the
+second argument of ``add_subset``.
 
 Notes
 -----

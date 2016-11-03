@@ -312,6 +312,56 @@ class ChoicesTestCase(BaseTestCase):
                 name='EXTENDED'
             )
 
+    def test_extracting_subset(self):
+        """Test that we can extract a subset of choices."""
+
+        subset = self.MY_CHOICES.extract_subset('ONE', 'TWO')
+
+        self.assertIsInstance(subset, Choices)
+
+        # Test django expected tuples
+        expected = (
+            (1, 'One for the money'),
+            (2, 'Two for the show'),
+        )
+
+        self.assertEqual(subset, expected)
+        self.assertEqual(subset.choices, expected)
+
+        # Test entries
+        self.assertEqual(len(subset.entries), 2)
+        self.assertIsInstance(subset.entries[0], ChoiceEntry)
+        self.assertEqual(subset.entries[0].constant, 'ONE')
+        self.assertEqual(subset.entries[0].value, 1)
+        self.assertEqual(subset.entries[0].display, 'One for the money')
+
+        self.assertIsInstance(subset.entries[1], ChoiceEntry)
+        self.assertEqual(subset.entries[1].constant, 'TWO')
+        self.assertEqual(subset.entries[1].value, 2)
+        self.assertEqual(subset.entries[1].display, 'Two for the show')
+
+        # Test dicts
+        self.assertEqual(len(subset.constants), 2)
+        self.assertEqual(len(subset.values), 2)
+        self.assertEqual(len(subset.displays), 2)
+
+        self.assertIs(subset.constants['ONE'],
+                      self.MY_CHOICES.constants['ONE'])
+        self.assertIs(subset.constants['TWO'],
+                      self.MY_CHOICES.constants['TWO'])
+        self.assertIs(subset.values[1],
+                      self.MY_CHOICES.constants['ONE'])
+        self.assertIs(subset.values[2],
+                      self.MY_CHOICES.constants['TWO'])
+        self.assertIs(subset.displays['One for the money'],
+                      self.MY_CHOICES.constants['ONE'])
+        self.assertIs(subset.displays['Two for the show'],
+                      self.MY_CHOICES.constants['TWO'])
+
+        # Test ``in``
+        self.assertIn(1, subset)
+        self.assertNotIn(4, subset)
+
     def test_creating_subset(self):
         """Test that we can add subset of choices."""
 

@@ -355,6 +355,74 @@ class Choices(list):
         if subset_name:
             self.add_subset(subset_name, constants)
 
+    def extract_subset(self, *constants):
+        """Create a subset of entries
+
+        This subset is a new ``Choices`` instance, with only the wanted constants from the
+        main ``Choices`` (each "choice entry" in the subset is shared from the main ``Choices``)
+
+        Parameters
+        ----------
+        *constants: list
+            The constants names of this ``Choices`` object to make available in the subset.
+
+        Returns
+        -------
+        Choices
+            The newly created subset, which is a ``Choices`` object
+
+
+        Example
+        -------
+
+        >>> STATES = Choices(
+        ...     ('ONLINE',  1, 'Online'),
+        ...     ('DRAFT',   2, 'Draft'),
+        ...     ('OFFLINE', 3, 'Offline'),
+        ... )
+        >>> STATES
+        [(u'ONLINE', 1, u'Online'), (u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        >>> subset = STATES.extract_subset('DRAFT', 'OFFLINE')
+        >>> subset
+        [(u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        >>> subset.DRAFT
+        2
+        >>> subset.for_constant('DRAFT') is STATES.for_constant('DRAFT')
+        True
+        >>> subset.ONLINE
+        Traceback (most recent call last):
+        ...
+        AttributeError: 'Choices' object has no attribute 'ONLINE'
+
+
+        Raises
+        ------
+        ValueError
+            If a constant is not defined as a constant in the ``Choices`` instance.
+
+        """
+
+        # Ensure that all passed constants exists as such in the list of available constants.
+        bad_constants = set(constants).difference(self.constants)
+        if bad_constants:
+            raise ValueError("All constants in subsets should be in parent choice. "
+                             "Missing constants: %s." % list(bad_constants))
+
+        # Keep only entries we asked for.
+        choice_entries = [self.constants[c] for c in constants]
+
+        # Create a new ``Choices`` instance with the limited set of entries, and pass the other
+        # configuration attributes to share the same behavior as the current ``Choices``.
+        # Also we set ``mutable`` to False to disable the possibility to add new choices to the
+        # subset.
+        subset = self.__class__(
+            *choice_entries, **{
+            'dict_class': self.dict_class,
+            'mutable': False,
+        })
+
+        return subset
+
     def add_subset(self, name, constants):
         """Add a subset of entries under a defined name.
 
@@ -362,7 +430,7 @@ class Choices(list):
         choice available.
 
         The sub-choice is a new ``Choices`` instance, with only the wanted the constant from the
-        main ``Choices`` (each "choice entry" in the subset is shared from the main ``Choices``.
+        main ``Choices`` (each "choice entry" in the subset is shared from the main ``Choices``)
         The sub-choice is accessible from the main ``Choices`` by an attribute having the given
         name.
 
@@ -372,6 +440,12 @@ class Choices(list):
             Name of the attribute that will old the new ``Choices`` instance.
         constants: list
             List of the constants name of this ``Choices`` object to make available in the subset.
+
+
+        Returns
+        -------
+        Choices
+            The newly created subset, which is a ``Choices`` object
 
 
         Example
@@ -411,28 +485,12 @@ class Choices(list):
             raise ValueError("Cannot use '%s' as a subset name. "
                              "It's already an attribute." % name)
 
-        # Ensure that all passed constants exists as such in the list of available constants.
-        bad_constants = set(constants).difference(self.constants)
-        if bad_constants:
-            raise ValueError("All constants in subsets should be in parent choice. "
-                             "Missing constants: %s." % list(bad_constants))
-
-        # Keep only entries we asked for.
-        choice_entries = [self.constants[c] for c in constants]
-
-        # Create a new ``Choices`` instance with the limited set of entries, and pass the other
-        # configuration attributes to share the same behavior as the current ``Choices``.
-        # Also we set ``mutable`` to False to disable the possibility to add new choices to the
-        # subset.
-        subset = self.__class__(
-            *choice_entries, **{
-            'dict_class': self.dict_class,
-            'mutable': False,
-        })
+        subset = self.extract_subset(*constants)
 
         # Make the subset accessible via an attribute.
         setattr(self, name, subset)
         self.subsets.append(name)
+
 
     def for_constant(self, constant):
         """Returns the ``ChoiceEntry`` for the given constant.
