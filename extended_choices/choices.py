@@ -22,7 +22,7 @@ The aim is to replace:
         state      = models.PositiveSmallIntegerField(choices=STATE_CHOICES, default=STATE_DRAFT)
 
         def __unicode__(self):
-            return u'Content "%s" (state=%s)' % (self.title, STATE_DICT[self.state])
+            return 'Content "%s" (state=%s)' % (self.title, STATE_DICT[self.state])
 
     print(Content.objects.filter(state=STATE_ONLINE))
 
@@ -44,7 +44,7 @@ By this:
         state      = models.PositiveSmallIntegerField(choices=STATES, default=STATES.DRAFT)
 
         def __unicode__(self):
-            return u'Content "%s" (state=%s)' % (self.title, STATES.for_value(self.state).display)
+            return 'Content "%s" (state=%s)' % (self.title, STATES.for_value(self.state).display)
 
     print(Content.objects.filter(state=STATES.ONLINE))
 
@@ -97,11 +97,18 @@ class Choices(list):
 
     Start by declaring your ``Choices``:
 
+    >>> import sys
+    >>> if sys.version_info >= (2, 7):
+    ...     from collections import OrderedDict
+    ... else:
+    ...     from django.utils.datastructures import SortedDict as OrderedDict
+
     >>> ALIGNMENTS = Choices(
     ...     ('BAD', 10, 'bad'),
     ...     ('NEUTRAL', 20, 'neutral'),
     ...     ('CHAOTIC_GOOD', 30, 'chaotic good'),
     ...     ('GOOD', 40, 'good'),
+    ...     dict_class=OrderedDict
     ... )
 
     Then you can use it in a django field, Notice its usage in ``choices`` and ``default``:
@@ -116,18 +123,18 @@ class Choices(list):
 
     The ``Choices`` returns a list as expected by django:
 
-    >>> ALIGNMENTS == ((10, u'bad'), (20, u'neutral'), (30, u'chaotic good'), (40, u'good'))
+    >>> ALIGNMENTS == ((10, 'bad'), (20, 'neutral'), (30, 'chaotic good'), (40, 'good'))
     True
 
     But represents it with the constants:
 
     >>> repr(ALIGNMENTS)
-    "[(u'BAD', 10, u'bad'), (u'NEUTRAL', 20, u'neutral'), (u'CHAOTIC_GOOD', 30, u'chaotic good'), (u'GOOD', 40, u'good')]"
+    "[('BAD', 10, 'bad'), ('NEUTRAL', 20, 'neutral'), ('CHAOTIC_GOOD', 30, 'chaotic good'), ('GOOD', 40, 'good')]"
 
     Use ``choices`` which is a simple list to represent it as such:
 
     >>> ALIGNMENTS.choices
-    ((10, u'bad'), (20, u'neutral'), (30, u'chaotic good'), (40, u'good'))
+    ((10, 'bad'), (20, 'neutral'), (30, 'chaotic good'), (40, 'good'))
 
 
     And you can access value by their constant, or as you want:
@@ -135,7 +142,7 @@ class Choices(list):
     >>> ALIGNMENTS.BAD
     10
     >>> ALIGNMENTS.BAD.display
-    u'bad'
+    'bad'
     >>> 40 in ALIGNMENTS
     True
     >>> ALIGNMENTS.has_constant('BAD')
@@ -145,25 +152,25 @@ class Choices(list):
     >>> ALIGNMENTS.has_display('good')
     True
     >>> ALIGNMENTS.for_value(10)
-    (u'BAD', 10, u'bad')
+    ('BAD', 10, 'bad')
     >>> ALIGNMENTS.for_value(10).constant
-    u'BAD'
+    'BAD'
     >>> ALIGNMENTS.for_display('good').value
     40
     >>> ALIGNMENTS.for_constant('NEUTRAL').display
-    u'neutral'
+    'neutral'
     >>> ALIGNMENTS.constants
-    {u'CHAOTIC_GOOD': (u'CHAOTIC_GOOD', 30, u'chaotic good'), u'BAD': (u'BAD', 10, u'bad'), u'GOOD': (u'GOOD', 40, u'good'), u'NEUTRAL': (u'NEUTRAL', 20, u'neutral')}
+    OrderedDict([('BAD', ('BAD', 10, 'bad')), ('NEUTRAL', ('NEUTRAL', 20, 'neutral')), ('CHAOTIC_GOOD', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('GOOD', ('GOOD', 40, 'good'))])
     >>> ALIGNMENTS.values
-    {40: (u'GOOD', 40, u'good'), 10: (u'BAD', 10, u'bad'), 20: (u'NEUTRAL', 20, u'neutral'), 30: (u'CHAOTIC_GOOD', 30, u'chaotic good')}
+    OrderedDict([(10, ('BAD', 10, 'bad')), (20, ('NEUTRAL', 20, 'neutral')), (30, ('CHAOTIC_GOOD', 30, 'chaotic good')), (40, ('GOOD', 40, 'good'))])
     >>> ALIGNMENTS.displays
-    {u'bad': (u'BAD', 10, u'bad'), u'good': (u'GOOD', 40, u'good'), u'neutral': (u'NEUTRAL', 20, u'neutral'), u'chaotic good': (u'CHAOTIC_GOOD', 30, u'chaotic good')}
+    OrderedDict([('bad', ('BAD', 10, 'bad')), ('neutral', ('NEUTRAL', 20, 'neutral')), ('chaotic good', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('good', ('GOOD', 40, 'good'))])
 
     You can create subsets of choices:
 
     >>> ALIGNMENTS.add_subset('WESTERN',('BAD', 'GOOD'))
     >>> ALIGNMENTS.WESTERN.choices
-    ((10, u'bad'), (40, u'good'))
+    ((10, 'bad'), (40, 'good'))
     >>> ALIGNMENTS.BAD in ALIGNMENTS.WESTERN
     True
     >>> ALIGNMENTS.NEUTRAL in ALIGNMENTS.WESTERN
@@ -217,7 +224,7 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.choices
-        ((1, u'foo'), (2, u'bar'))
+        ((1, 'foo'), (2, 'bar'))
 
         """
         return tuple(self)
@@ -253,17 +260,17 @@ class Choices(list):
         >>> MY_CHOICES = Choices()
         >>> MY_CHOICES.add_choices(('ZERO', 0, 'zero'))
         >>> MY_CHOICES
-        [(u'ZERO', 0, u'zero')]
+        [('ZERO', 0, 'zero')]
         >>> MY_CHOICES.add_choices('SMALL', ('ONE', 1, 'one'), ('TWO', 2, 'two'))
         >>> MY_CHOICES
-        [(u'ZERO', 0, u'zero'), (u'ONE', 1, u'one'), (u'TWO', 2, u'two')]
+        [('ZERO', 0, 'zero'), ('ONE', 1, 'one'), ('TWO', 2, 'two')]
         >>> MY_CHOICES.SMALL
-        [(u'ONE', 1, u'one'), (u'TWO', 2, u'two')]
+        [('ONE', 1, 'one'), ('TWO', 2, 'two')]
         >>> MY_CHOICES.add_choices(('THREE', 3, 'three'), ('FOUR', 4, 'four'), name='BIG')
         >>> MY_CHOICES
-        [(u'ZERO', 0, u'zero'), (u'ONE', 1, u'one'), (u'TWO', 2, u'two'), (u'THREE', 3, u'three'), (u'FOUR', 4, u'four')]
+        [('ZERO', 0, 'zero'), ('ONE', 1, 'one'), ('TWO', 2, 'two'), ('THREE', 3, 'three'), ('FOUR', 4, 'four')]
         >>> MY_CHOICES.BIG
-        [(u'THREE', 3, u'three'), (u'FOUR', 4, u'four')]
+        [('THREE', 3, 'three'), ('FOUR', 4, 'four')]
 
         Raises
         ------
@@ -380,10 +387,10 @@ class Choices(list):
         ...     ('OFFLINE', 3, 'Offline'),
         ... )
         >>> STATES
-        [(u'ONLINE', 1, u'Online'), (u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        [('ONLINE', 1, 'Online'), ('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
         >>> subset = STATES.extract_subset('DRAFT', 'OFFLINE')
         >>> subset
-        [(u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        [('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
         >>> subset.DRAFT
         2
         >>> subset.for_constant('DRAFT') is STATES.for_constant('DRAFT')
@@ -458,10 +465,10 @@ class Choices(list):
         ...     ('OFFLINE', 3, 'Offline'),
         ... )
         >>> STATES
-        [(u'ONLINE', 1, u'Online'), (u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        [('ONLINE', 1, 'Online'), ('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
         >>> STATES.add_subset('NOT_ONLINE', ('DRAFT', 'OFFLINE',))
         >>> STATES.NOT_ONLINE
-        [(u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        [('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
         >>> STATES.NOT_ONLINE.DRAFT
         2
         >>> STATES.NOT_ONLINE.for_constant('DRAFT') is STATES.for_constant('DRAFT')
@@ -515,13 +522,13 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.for_constant('FOO')
-        (u'FOO', 1, u'foo')
+        ('FOO', 1, 'foo')
         >>> MY_CHOICES.for_constant('FOO').value
         1
         >>> MY_CHOICES.for_constant('QUX')
         Traceback (most recent call last):
         ...
-        KeyError: u'QUX'
+        KeyError: 'QUX'
 
         """
 
@@ -550,9 +557,9 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.for_value(1)
-        (u'FOO', 1, u'foo')
+        ('FOO', 1, 'foo')
         >>> MY_CHOICES.for_value(1).display
-        u'foo'
+        'foo'
         >>> MY_CHOICES.for_value(3)
         Traceback (most recent call last):
         ...
@@ -585,13 +592,13 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.for_display('foo')
-        (u'FOO', 1, u'foo')
+        ('FOO', 1, 'foo')
         >>> MY_CHOICES.for_display('foo').constant
-        u'FOO'
+        'FOO'
         >>> MY_CHOICES.for_display('qux')
         Traceback (most recent call last):
         ...
-        KeyError: u'qux'
+        KeyError: 'qux'
 
         """
 
@@ -731,7 +738,7 @@ class Choices(list):
         -------
 
         >>> Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
-        [(u'FOO', 1, u'foo'), (u'BAR', 2, u'bar')]
+        [('FOO', 1, 'foo'), ('BAR', 2, 'bar')]
 
         """
 

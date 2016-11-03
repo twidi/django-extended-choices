@@ -51,9 +51,9 @@ class ChoiceAttributeMixin(object):
     >>> field
     1
     >>> field.constant, field.value, field.display
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> field.choice_entry
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
 
     Or via the ``get_class_for_value`` class method:
 
@@ -237,17 +237,17 @@ class ChoiceEntry(tuple):
 
     >>> entry = ChoiceEntry(('FOO', 1, 'foo'))
     >>> entry
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> (entry.constant, entry.value, entry.display)
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> entry.choice
-    (1, u'foo')
+    (1, 'foo')
 
     You can also pass attributes to add to the instance to create:
 
     >>> entry = ChoiceEntry(('FOO', 1, 'foo', {'bar': 1, 'baz': 2}))
     >>> entry
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> entry.bar
     1
     >>> entry.baz
