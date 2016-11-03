@@ -11,12 +11,7 @@ The documentation format in this file is numpydoc_.
 
 from __future__ import unicode_literals
 
-from builtins import object
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+from builtins import object  # pylint: disable=redefined-builtin
 
 from django.utils.functional import Promise
 
@@ -56,9 +51,9 @@ class ChoiceAttributeMixin(object):
     >>> field
     1
     >>> field.constant, field.value, field.display
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> field.choice_entry
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
 
     Or via the ``get_class_for_value`` class method:
 
@@ -70,7 +65,7 @@ class ChoiceAttributeMixin(object):
 
     """
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs):  # pylint: disable=unused-argument
         """Construct the object (the other class used with this mixin).
 
         Notes
@@ -108,6 +103,7 @@ class ChoiceAttributeMixin(object):
 
         if isinstance(self, Promise):
             # Special case to manage lazy django stuff like ugettext_lazy
+            # pylint: disable=protected-access
             super(ChoiceAttributeMixin, self).__init__(value._proxy____args, value._proxy____kw)
         else:
             super(ChoiceAttributeMixin, self).__init__()
@@ -189,7 +185,7 @@ class ChoiceAttributeMixin(object):
         )
 
     def __bool__(self):
-        """Use the original value to know if the value is truely of falsy"""
+        """Use the original value to know if the value is truthy of falsy"""
         return bool(self.original_value)
 
     _classes_by_type = {}
@@ -226,7 +222,7 @@ class ChoiceEntry(tuple):
     Expecting a tuple with three entries. (constant, value, display name), it will add three
     attributes to access then: ``constant``, ``value`` and ``display``.
 
-    By passing a dict after these three first entries, in the tuple, it's alose possible to
+    By passing a dict after these three first entries, in the tuple, it's also possible to
     add some other attributes to the ``ChoiceEntry` instance``.
 
     Parameters
@@ -241,17 +237,17 @@ class ChoiceEntry(tuple):
 
     >>> entry = ChoiceEntry(('FOO', 1, 'foo'))
     >>> entry
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> (entry.constant, entry.value, entry.display)
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> entry.choice
-    (1, u'foo')
+    (1, 'foo')
 
     You can also pass attributes to add to the instance to create:
 
     >>> entry = ChoiceEntry(('FOO', 1, 'foo', {'bar': 1, 'baz': 2}))
     >>> entry
-    (u'FOO', 1, u'foo')
+    ('FOO', 1, 'foo')
     >>> entry.bar
     1
     >>> entry.baz
@@ -277,6 +273,7 @@ class ChoiceEntry(tuple):
         obj = super(ChoiceEntry, cls).__new__(cls, tuple_[:3])
 
         # Save all special attributes.
+        # pylint: disable=protected-access
         obj.constant = obj._get_choice_attribute(tuple_[0])
         obj.value = obj._get_choice_attribute(tuple_[1])
         obj.display = obj._get_choice_attribute(tuple_[2])

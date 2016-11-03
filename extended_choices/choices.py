@@ -22,7 +22,7 @@ The aim is to replace:
         state      = models.PositiveSmallIntegerField(choices=STATE_CHOICES, default=STATE_DRAFT)
 
         def __unicode__(self):
-            return u'Content "%s" (state=%s)' % (self.title, STATE_DICT[self.state])
+            return 'Content "%s" (state=%s)' % (self.title, STATE_DICT[self.state])
 
     print(Content.objects.filter(state=STATE_ONLINE))
 
@@ -44,7 +44,7 @@ By this:
         state      = models.PositiveSmallIntegerField(choices=STATES, default=STATES.DRAFT)
 
         def __unicode__(self):
-            return u'Content "%s" (state=%s)' % (self.title, STATES.for_value(self.state).display)
+            return 'Content "%s" (state=%s)' % (self.title, STATES.for_value(self.state).display)
 
     print(Content.objects.filter(state=STATES.ONLINE))
 
@@ -60,9 +60,15 @@ The documentation format in this file is numpydoc_.
 
 from __future__ import unicode_literals
 
+import sys
 from past.builtins import basestring
 
-from .helpers import ChoiceAttributeMixin, ChoiceEntry
+if sys.version_info >= (2, 7):
+    from collections import OrderedDict
+else:
+    from django.utils.datastructures import SortedDict as OrderedDict
+
+from .helpers import ChoiceEntry
 
 __all__ = ['Choices']
 
@@ -89,11 +95,9 @@ class Choices(list):
         If set, a subset will be created containing all the constants. It could be used if you
         construct your ``Choices`` instance with many calls to ``add_choices``.
     dict_class : type, optional
-        ``dict`` by default, it's the dict class to use to create dictionnaries (``constants``,
-        ``values`` and ``displays``. Could be set for example to ``OrderedSet``.
-    retro_compatibility : boolean, optional
-        ``True`` by default, it makes the ``Choices`` object compatible with version < 1.
-        If set to ``False``, all the attributes created for this purpose wont be created.
+        ``dict`` by default, it's the dict class to use to create dictionaries (``constants``,
+        ``values`` and ``displays``. Could be set for example to ``OrderedDict`` (you can use
+        ``OrderedChoices`` that is a simple subclass using ``OrderedDict``.
 
     Example
     -------
@@ -105,6 +109,7 @@ class Choices(list):
     ...     ('NEUTRAL', 20, 'neutral'),
     ...     ('CHAOTIC_GOOD', 30, 'chaotic good'),
     ...     ('GOOD', 40, 'good'),
+    ...     dict_class=OrderedDict
     ... )
 
     Then you can use it in a django field, Notice its usage in ``choices`` and ``default``:
@@ -119,18 +124,18 @@ class Choices(list):
 
     The ``Choices`` returns a list as expected by django:
 
-    >>> ALIGNMENTS == ((10, u'bad'), (20, u'neutral'), (30, u'chaotic good'), (40, u'good'))
+    >>> ALIGNMENTS == ((10, 'bad'), (20, 'neutral'), (30, 'chaotic good'), (40, 'good'))
     True
 
     But represents it with the constants:
 
     >>> repr(ALIGNMENTS)
-    "[(u'BAD', 10, u'bad'), (u'NEUTRAL', 20, u'neutral'), (u'CHAOTIC_GOOD', 30, u'chaotic good'), (u'GOOD', 40, u'good')]"
+    "[('BAD', 10, 'bad'), ('NEUTRAL', 20, 'neutral'), ('CHAOTIC_GOOD', 30, 'chaotic good'), ('GOOD', 40, 'good')]"
 
     Use ``choices`` which is a simple list to represent it as such:
 
     >>> ALIGNMENTS.choices
-    ((10, u'bad'), (20, u'neutral'), (30, u'chaotic good'), (40, u'good'))
+    ((10, 'bad'), (20, 'neutral'), (30, 'chaotic good'), (40, 'good'))
 
 
     And you can access value by their constant, or as you want:
@@ -138,7 +143,7 @@ class Choices(list):
     >>> ALIGNMENTS.BAD
     10
     >>> ALIGNMENTS.BAD.display
-    u'bad'
+    'bad'
     >>> 40 in ALIGNMENTS
     True
     >>> ALIGNMENTS.has_constant('BAD')
@@ -148,25 +153,25 @@ class Choices(list):
     >>> ALIGNMENTS.has_display('good')
     True
     >>> ALIGNMENTS.for_value(10)
-    (u'BAD', 10, u'bad')
+    ('BAD', 10, 'bad')
     >>> ALIGNMENTS.for_value(10).constant
-    u'BAD'
+    'BAD'
     >>> ALIGNMENTS.for_display('good').value
     40
     >>> ALIGNMENTS.for_constant('NEUTRAL').display
-    u'neutral'
+    'neutral'
     >>> ALIGNMENTS.constants
-    {u'CHAOTIC_GOOD': (u'CHAOTIC_GOOD', 30, u'chaotic good'), u'BAD': (u'BAD', 10, u'bad'), u'GOOD': (u'GOOD', 40, u'good'), u'NEUTRAL': (u'NEUTRAL', 20, u'neutral')}
+    OrderedDict([('BAD', ('BAD', 10, 'bad')), ('NEUTRAL', ('NEUTRAL', 20, 'neutral')), ('CHAOTIC_GOOD', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('GOOD', ('GOOD', 40, 'good'))])
     >>> ALIGNMENTS.values
-    {40: (u'GOOD', 40, u'good'), 10: (u'BAD', 10, u'bad'), 20: (u'NEUTRAL', 20, u'neutral'), 30: (u'CHAOTIC_GOOD', 30, u'chaotic good')}
+    OrderedDict([(10, ('BAD', 10, 'bad')), (20, ('NEUTRAL', 20, 'neutral')), (30, ('CHAOTIC_GOOD', 30, 'chaotic good')), (40, ('GOOD', 40, 'good'))])
     >>> ALIGNMENTS.displays
-    {u'bad': (u'BAD', 10, u'bad'), u'good': (u'GOOD', 40, u'good'), u'neutral': (u'NEUTRAL', 20, u'neutral'), u'chaotic good': (u'CHAOTIC_GOOD', 30, u'chaotic good')}
+    OrderedDict([('bad', ('BAD', 10, 'bad')), ('neutral', ('NEUTRAL', 20, 'neutral')), ('chaotic good', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('good', ('GOOD', 40, 'good'))])
 
     You can create subsets of choices:
 
     >>> ALIGNMENTS.add_subset('WESTERN',('BAD', 'GOOD'))
     >>> ALIGNMENTS.WESTERN.choices
-    ((10, u'bad'), (40, u'good'))
+    ((10, 'bad'), (40, 'good'))
     >>> ALIGNMENTS.BAD in ALIGNMENTS.WESTERN
     True
     >>> ALIGNMENTS.NEUTRAL in ALIGNMENTS.WESTERN
@@ -204,20 +209,6 @@ class Choices(list):
         self.values = self.dict_class()
         self.displays = self.dict_class()
 
-        # Will be removed one day. See the "compatibility" section in the documentation.
-        self.retro_compatibility = kwargs.get('retro_compatibility', True)
-        if self.retro_compatibility:
-            # Hold the list of tuples as expected by django.
-            self.CHOICES = tuple()
-            # To get  display strings from their values.
-            self.CHOICES_DICT = self.dict_class()
-            # To get values from their display strings.
-            self.REVERTED_CHOICES_DICT = self.dict_class()
-            # To get values from their constant names.
-            self.CHOICES_CONST_DICT = self.dict_class()
-            # To get constant names from their values.
-            self.REVERTED_CHOICES_CONST_DICT = self.dict_class()
-
         # For now this instance is mutable: we need to add the given choices.
         self._mutable = True
         self.add_choices(*choices, name=kwargs.get('name', None))
@@ -234,7 +225,7 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.choices
-        ((1, u'foo'), (2, u'bar'))
+        ((1, 'foo'), (2, 'bar'))
 
         """
         return tuple(self)
@@ -259,10 +250,10 @@ class Choices(list):
 
             If the first entry of ``*choices`` is a string, then it will be used as a name for a
             new subset that will contain all the given choices.
-
-        name : string
-            Instead of using the first entry of the ``*choices`` to pass a name of a subset to
-            create, you can pass it via the ``name`` named argument.
+        **kwargs : dict
+            name : string
+                Instead of using the first entry of the ``*choices`` to pass a name of a subset to
+                create, you can pass it via the ``name`` named argument.
 
         Example
         -------
@@ -270,17 +261,17 @@ class Choices(list):
         >>> MY_CHOICES = Choices()
         >>> MY_CHOICES.add_choices(('ZERO', 0, 'zero'))
         >>> MY_CHOICES
-        [(u'ZERO', 0, u'zero')]
+        [('ZERO', 0, 'zero')]
         >>> MY_CHOICES.add_choices('SMALL', ('ONE', 1, 'one'), ('TWO', 2, 'two'))
         >>> MY_CHOICES
-        [(u'ZERO', 0, u'zero'), (u'ONE', 1, u'one'), (u'TWO', 2, u'two')]
+        [('ZERO', 0, 'zero'), ('ONE', 1, 'one'), ('TWO', 2, 'two')]
         >>> MY_CHOICES.SMALL
-        [(u'ONE', 1, u'one'), (u'TWO', 2, u'two')]
+        [('ONE', 1, 'one'), ('TWO', 2, 'two')]
         >>> MY_CHOICES.add_choices(('THREE', 3, 'three'), ('FOUR', 4, 'four'), name='BIG')
         >>> MY_CHOICES
-        [(u'ZERO', 0, u'zero'), (u'ONE', 1, u'one'), (u'TWO', 2, u'two'), (u'THREE', 3, u'three'), (u'FOUR', 4, u'four')]
+        [('ZERO', 0, 'zero'), ('ONE', 1, 'one'), ('TWO', 2, 'two'), ('THREE', 3, 'three'), ('FOUR', 4, 'four')]
         >>> MY_CHOICES.BIG
-        [(u'THREE', 3, u'three'), (u'FOUR', 4, u'four')]
+        [('THREE', 3, 'three'), ('FOUR', 4, 'four')]
 
         Raises
         ------
@@ -345,15 +336,14 @@ class Choices(list):
             raise ValueError("You cannot add existing values. "
                              "Existing values: %s." % list(bad_values))
 
-        # We can now add eqch choice.
+        # We can now add each choice.
         for choice_tuple in choices:
 
             # Convert the choice tuple in a ``ChoiceEntry`` instance if it's not already done.
             # It allows to share choice entries between a ``Choices`` instance and its subsets.
-            if not isinstance(choice_tuple, self.ChoiceEntryClass):
-                choice_entry = self.ChoiceEntryClass(choice_tuple)
-            else:
-                choice_entry = choice_tuple
+            choice_entry = choice_tuple
+            if not isinstance(choice_entry, self.ChoiceEntryClass):
+                choice_entry = self.ChoiceEntryClass(choice_entry)
 
             # Append to the main list the choice as expected by django: (value, display name).
             self.append(choice_entry.choice)
@@ -368,43 +358,25 @@ class Choices(list):
             self.values[choice_entry.value] = choice_entry
             self.displays[choice_entry.display] = choice_entry
 
-            # Will be removed one day. See the "compatibility" section in the documentation.
-            if self.retro_compatibility:
-                # To get  display strings from their values.
-                self.CHOICES_DICT[choice_entry.value] = choice_entry.display
-                # To get values from their display strings.
-                self.REVERTED_CHOICES_DICT[choice_entry.display] = choice_entry.value
-                # To get values from their constant names.
-                self.CHOICES_CONST_DICT[choice_entry.constant] = choice_entry.value
-                # To get constant names from their values.
-                self.REVERTED_CHOICES_CONST_DICT[choice_entry.value] = choice_entry.constant
-
-        # Will be removed one day. See the "compatibility" section in the documentation.
-        if self.retro_compatibility:
-            # Hold the list of tuples as expected by django.
-            self.CHOICES = self.choices
-
         # If we have a subset name, create a new subset with all the given constants.
-        if subset_name and (not self.retro_compatibility or subset_name != 'CHOICES'):
+        if subset_name:
             self.add_subset(subset_name, constants)
 
-    def add_subset(self, name, constants):
-        """Add a subset of entries under a defined name.
+    def extract_subset(self, *constants):
+        """Create a subset of entries
 
-        This allow to defined a "sub choice" if a django field need to not have the whole
-        choice available.
-
-        The sub-choice is a new ``Choices`` instance, with only the wanted the constant from the
-        main ``Choices`` (each "choice entry" in the subset is shared from the main ``Choices``.
-        The sub-choice is accessible from the main ``Choices`` by an attribute having the given
-        name.
+        This subset is a new ``Choices`` instance, with only the wanted constants from the
+        main ``Choices`` (each "choice entry" in the subset is shared from the main ``Choices``)
 
         Parameters
         ----------
-        name : string
-            Name of the attribute that will old the new ``Choices`` instance.
-        constants: list
-            List of the constants name of this ``Choices`` object to make available in the subset.
+        *constants: list
+            The constants names of this ``Choices`` object to make available in the subset.
+
+        Returns
+        -------
+        Choices
+            The newly created subset, which is a ``Choices`` object
 
 
         Example
@@ -416,10 +388,88 @@ class Choices(list):
         ...     ('OFFLINE', 3, 'Offline'),
         ... )
         >>> STATES
-        [(u'ONLINE', 1, u'Online'), (u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        [('ONLINE', 1, 'Online'), ('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
+        >>> subset = STATES.extract_subset('DRAFT', 'OFFLINE')
+        >>> subset
+        [('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
+        >>> subset.DRAFT
+        2
+        >>> subset.for_constant('DRAFT') is STATES.for_constant('DRAFT')
+        True
+        >>> subset.ONLINE
+        Traceback (most recent call last):
+        ...
+        AttributeError: 'Choices' object has no attribute 'ONLINE'
+
+
+        Raises
+        ------
+        ValueError
+            If a constant is not defined as a constant in the ``Choices`` instance.
+
+        """
+
+        # Ensure that all passed constants exists as such in the list of available constants.
+        bad_constants = set(constants).difference(self.constants)
+        if bad_constants:
+            raise ValueError("All constants in subsets should be in parent choice. "
+                             "Missing constants: %s." % list(bad_constants))
+
+        # Keep only entries we asked for.
+        choice_entries = [self.constants[c] for c in constants]
+
+        # Create a new ``Choices`` instance with the limited set of entries, and pass the other
+        # configuration attributes to share the same behavior as the current ``Choices``.
+        # Also we set ``mutable`` to False to disable the possibility to add new choices to the
+        # subset.
+        subset = self.__class__(
+            *choice_entries,
+            **{
+                'dict_class': self.dict_class,
+                'mutable': False,
+            }
+        )
+
+        return subset
+
+    def add_subset(self, name, constants):
+        """Add a subset of entries under a defined name.
+
+        This allow to defined a "sub choice" if a django field need to not have the whole
+        choice available.
+
+        The sub-choice is a new ``Choices`` instance, with only the wanted the constant from the
+        main ``Choices`` (each "choice entry" in the subset is shared from the main ``Choices``)
+        The sub-choice is accessible from the main ``Choices`` by an attribute having the given
+        name.
+
+        Parameters
+        ----------
+        name : string
+            Name of the attribute that will old the new ``Choices`` instance.
+        constants: list or tuple
+            List of the constants name of this ``Choices`` object to make available in the subset.
+
+
+        Returns
+        -------
+        Choices
+            The newly created subset, which is a ``Choices`` object
+
+
+        Example
+        -------
+
+        >>> STATES = Choices(
+        ...     ('ONLINE',  1, 'Online'),
+        ...     ('DRAFT',   2, 'Draft'),
+        ...     ('OFFLINE', 3, 'Offline'),
+        ... )
+        >>> STATES
+        [('ONLINE', 1, 'Online'), ('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
         >>> STATES.add_subset('NOT_ONLINE', ('DRAFT', 'OFFLINE',))
         >>> STATES.NOT_ONLINE
-        [(u'DRAFT', 2, u'Draft'), (u'OFFLINE', 3, u'Offline')]
+        [('DRAFT', 2, 'Draft'), ('OFFLINE', 3, 'Offline')]
         >>> STATES.NOT_ONLINE.DRAFT
         2
         >>> STATES.NOT_ONLINE.for_constant('DRAFT') is STATES.for_constant('DRAFT')
@@ -444,52 +494,11 @@ class Choices(list):
             raise ValueError("Cannot use '%s' as a subset name. "
                              "It's already an attribute." % name)
 
-        # Ensure that all passed constants exists as such in the list of available constants.
-        bad_constants = set(constants).difference(self.constants)
-        if bad_constants:
-            raise ValueError("All constants in subsets should be in parent choice. "
-                             "Missing constants: %s." % list(bad_constants))
-
-        # Keep only entries we asked for.
-        choice_entries = [self.constants[c] for c in constants]
-
-        # Create a new ``Choices`` instance with the limited set of entries, and pass the other
-        # configuration attributes to share the same behavior as the current ``Choices``.
-        # Also we set ``mutable`` to False to disable the possibility to add new choices to the
-        # subset.
-        subset = self.__class__(
-            *choice_entries, **{
-            'dict_class': self.dict_class,
-            'retro_compatibility': self.retro_compatibility,
-            'mutable': False,
-        })
+        subset = self.extract_subset(*constants)
 
         # Make the subset accessible via an attribute.
         setattr(self, name, subset)
         self.subsets.append(name)
-
-        # Will be removed one day. See the "compatibility" section in the documentation.
-        if self.retro_compatibility:
-            # To get  display strings from their values.
-            SUBSET_DICT = self.dict_class()
-            # To get values from their display strings.
-            REVERTED_SUBSET_DICT = self.dict_class()
-            # To get values from their constant names.
-            SUBSET_CONST_DICT = self.dict_class()
-            # To get constant names from their values.
-            REVERTED_SUBSET_CONST_DICT = self.dict_class()
-
-            for choice_entry in choice_entries:
-                SUBSET_DICT[choice_entry.value] = choice_entry.display
-                REVERTED_SUBSET_DICT[choice_entry.display] = choice_entry.value
-                SUBSET_CONST_DICT[choice_entry.constant] = choice_entry.value
-                REVERTED_SUBSET_CONST_DICT[choice_entry.value] = choice_entry.constant
-
-            # Prefix each quick-access dict by the name of the subset
-            setattr(self, '%s_DICT' % name, SUBSET_DICT)
-            setattr(self, 'REVERTED_%s_DICT' % name, REVERTED_SUBSET_DICT)
-            setattr(self, '%s_CONST_DICT' % name, SUBSET_CONST_DICT)
-            setattr(self, 'REVERTED_%s_CONST_DICT' % name, REVERTED_SUBSET_CONST_DICT)
 
     def for_constant(self, constant):
         """Returns the ``ChoiceEntry`` for the given constant.
@@ -514,13 +523,13 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.for_constant('FOO')
-        (u'FOO', 1, u'foo')
+        ('FOO', 1, 'foo')
         >>> MY_CHOICES.for_constant('FOO').value
         1
         >>> MY_CHOICES.for_constant('QUX')
         Traceback (most recent call last):
         ...
-        KeyError: u'QUX'
+        KeyError: 'QUX'
 
         """
 
@@ -549,9 +558,9 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.for_value(1)
-        (u'FOO', 1, u'foo')
+        ('FOO', 1, 'foo')
         >>> MY_CHOICES.for_value(1).display
-        u'foo'
+        'foo'
         >>> MY_CHOICES.for_value(3)
         Traceback (most recent call last):
         ...
@@ -584,13 +593,13 @@ class Choices(list):
 
         >>> MY_CHOICES = Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
         >>> MY_CHOICES.for_display('foo')
-        (u'FOO', 1, u'foo')
+        ('FOO', 1, 'foo')
         >>> MY_CHOICES.for_display('foo').constant
-        u'FOO'
+        'FOO'
         >>> MY_CHOICES.for_display('qux')
         Traceback (most recent call last):
         ...
-        KeyError: u'qux'
+        KeyError: 'qux'
 
         """
 
@@ -730,7 +739,7 @@ class Choices(list):
         -------
 
         >>> Choices(('FOO', 1, 'foo'), ('BAR', 2, 'bar'))
-        [(u'FOO', 1, u'foo'), (u'BAR', 2, u'bar')]
+        [('FOO', 1, 'foo'), ('BAR', 2, 'bar')]
 
         """
 
@@ -805,7 +814,7 @@ class Choices(list):
                         # The list of constants to use in this subset
                         [
                             c.original_value
-                            for c in  getattr(self, subset_name).constants.keys()
+                            for c in getattr(self, subset_name).constants.keys()
                         ]
                     )
                     for subset_name in self.subsets
@@ -813,11 +822,48 @@ class Choices(list):
                 # Extra kwargs to pass to ``__ini__``
                 {
                     'dict_class': self.dict_class,
-                    'retro_compatibility': self.retro_compatibility,
                     'mutable': self._mutable,
                 }
             )
         )
+
+
+class OrderedChoices(Choices):
+    """Simple subclass of ``Choices`` using ``OrderedDict`` as ``dict_class``
+
+    Example
+    -------
+
+    Start by declaring your ``Choices``:
+
+    >>> ALIGNMENTS = OrderedChoices(
+    ...     ('BAD', 10, 'bad'),
+    ...     ('NEUTRAL', 20, 'neutral'),
+    ...     ('CHAOTIC_GOOD', 30, 'chaotic good'),
+    ...     ('GOOD', 40, 'good'),
+    ... )
+
+    >>> ALIGNMENTS.dict_class
+    <class 'collections.OrderedDict'>
+
+    >>> ALIGNMENTS.constants
+    OrderedDict([('BAD', ('BAD', 10, 'bad')), ('NEUTRAL', ('NEUTRAL', 20, 'neutral')), ('CHAOTIC_GOOD', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('GOOD', ('GOOD', 40, 'good'))])
+    >>> ALIGNMENTS.values
+    OrderedDict([(10, ('BAD', 10, 'bad')), (20, ('NEUTRAL', 20, 'neutral')), (30, ('CHAOTIC_GOOD', 30, 'chaotic good')), (40, ('GOOD', 40, 'good'))])
+    >>> ALIGNMENTS.displays
+    OrderedDict([('bad', ('BAD', 10, 'bad')), ('neutral', ('NEUTRAL', 20, 'neutral')), ('chaotic good', ('CHAOTIC_GOOD', 30, 'chaotic good')), ('good', ('GOOD', 40, 'good'))])
+
+    """
+
+    def __init__(self, *choices, **kwargs):
+
+        # Class to use for dicts
+        if 'dict_class' not in kwargs:
+            kwargs['dict_class'] = OrderedDict
+
+        super(OrderedChoices, self).__init__(*choices, **kwargs)
+
+
 
 def create_choice(klass, choices, subsets, kwargs):
     """Create an instance of a ``Choices`` object.
@@ -849,6 +895,7 @@ def create_choice(klass, choices, subsets, kwargs):
 
 
 if __name__ == '__main__':
+    # pylint: disable=wrong-import-position,wrong-import-order
     import doctest
     doctest.testmod(report=True)
     from . import helpers

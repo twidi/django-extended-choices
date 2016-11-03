@@ -178,6 +178,9 @@ If you want these dicts to be ordered, you can pass the dict class to use to the
         dict_class = OrderedDict
     )
 
+Since version ``1.1``, the new ``OrderedChoices`` class is provided, that is exactly that:
+a ``Choices`` using ``OrderedDict`` by default for ``dict_class``.
+
 You can check if a constant, value, or display name exists:
 
 .. code-block:: python
@@ -260,7 +263,25 @@ You can also pass the ``argument`` to the ``Choices`` constructor to create a su
 the choices entries added at the same time (it will call ``add_choices`` with the name and the
 entries)
 
-The list of existing subset names is in the ``subsets`` attributes of the parent ``Choicess`` object.
+The list of existing subset names is in the ``subsets`` attributes of the parent ``Choices``
+object.
+
+If you want a subset of the choices but not save it in the original ``Choices`` object, you can
+use ``extract_subset`` instead of ``add_subset``
+
+.. code-block:: python
+
+    >>> subset = STATES.extract_subset('DRAFT', 'OFFLINE')
+    >>> subset
+    (2, 'Draft')
+    (3, 'Offline')
+
+
+As for a subset created by ``add_subset``, you have a real ``Choices`` object, but not accessible
+from the original ``Choices`` object.
+
+Note that in ``extract_subset``, you pass the strings directly, not in a list/tuple as for the
+second argument of ``add_subset``.
 
 Notes
 -----
@@ -272,46 +293,10 @@ Notes
 Compatibility
 -------------
 
-The version ``1.0`` provides a totally new API, but stays fully compatible with the previous one
-(``0.4.1``). So it adds a lot of attributes in each ``Choices`` instance:
+The version ``1.0`` provided a totally new API, and compatibility with the previous one
+(``0.4.1``) was removed in ``1.1``. The last version with the compatibility was ``1.0.7``.
 
-* ``CHOICES``
-* ``CHOICES_DICT``
-* ``REVERTED_CHOICES_DICT``
-* ``CHOICES_CONST_DICT``
-
-(And 4 more for each subset)
-
-If you don't want it, simply set the argument ``retro_compatibility`` to ``False`` when creating
-a ``Choices`` instance:
-
-.. code-block:: python
-
-    STATES = Choices(
-        ('ONLINE',  1, 'Online'),
-        ('DRAFT',   2, 'Draft'),
-        ('OFFLINE', 3, 'Offline'),
-        retro_compatibility=False
-    )
-
-This flag is currently ``True`` by default, and it will not be changed for at least 6 months
-counting from the publication of this version ``1.0`` (``1st of May, 2015``, so until the
-``1st of November, 2015``, AT LEAST, the compatibility will be on by default).
-
-Then, the flag will stay but will be off by default. To keep compatibility, you'll have to
-pass the ``retro_compatibility`` argument and set it to ``True``.
-
-Then, after another period of 6 months minimum, the flag and all the retro_compatibility code
-will be removed (so not before ``1st of May, 2016``).
-
-Note that you can use a specific version by pinning it in your requirements.
-
-The only exception to these rules, it's the support of Django ``1.4`` that was removed in version
-``1.0.3`` due to some incompatibility problems with ``ugettext_lazy``.
-
-Also, the support of ``None`` values was removed, raising a ``ValueError`` telling the user to
-instead use an empty string.
-
+If you need this compatibility, you can use a specific version by pinning it in your requirements.
 
 License
 -------
@@ -321,9 +306,9 @@ Available under the BSD_ License. See the ``LICENSE`` file included
 Python 3?
 ---------
 
-Of course! We support python ``2.6``, ``2.7``, ``3.3`` and `3.4`, for Django version ``1.5.x`` to
-``1.8.x``, respecting the `Django matrix`_ (except for python ``2.5`` and ``3.2`` which are not
-supported by ``django-extended-choices``)
+Of course! We support python ``2.6``, ``2.7``, ``3.3``, ``3.4`` and ``3.5``, for Django version
+``1.5.x`` to ``1.10.x``, respecting the `Django matrix`_ (except for python ``2.5`` and ``3.2``
+which are not supported by ``django-extended-choices``)
 
 
 Tests
@@ -337,6 +322,9 @@ To run tests from the code source, create a virtualenv or activate one, install 
 We also provides some quick doctests in the code documentation. To execute them::
 
     python -m extended_choices.choices
+
+
+Note: the doctests will work only in python version not display `u` prefix for strings.
 
 
 Source code
