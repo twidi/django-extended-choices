@@ -19,7 +19,7 @@ if sys.version_info < (2, 7):
 
 setup(
     name="django-extended-choices",
-    version="1.0.7",
+    version="1.1",
     license="BSD",
     description="Little helper application to improve django choices"
     "(for fields)",
@@ -42,6 +42,8 @@ setup(
         "Framework :: Django :: 1.6",
         "Framework :: Django :: 1.7",
         "Framework :: Django :: 1.8",
+        "Framework :: Django :: 1.9",
+        "Framework :: Django :: 1.10",
         "Operating System :: OS Independent",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
@@ -52,6 +54,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ]
