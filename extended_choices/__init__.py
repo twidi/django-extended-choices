@@ -8,4 +8,4 @@ __all__ = ['Choices', 'OrderedChoices']
 __author__ = 'Stephane "Twidi" Ange;'
 __contact__ = "s.angel@twidi.com"
 __homepage__ = "https://pypi.python.org/pypi/django-extended-choices"
-__version__ = "1.1.1"
+__version__ = "1.1.2"

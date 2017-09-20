@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Unreleased
+Release *v1.1.2* - ``2017-09-20``
 ---------------------------------
 * add ``__all__`` at package root
 * supports Django 1.8, 1.9, 1.10 and 1.11
