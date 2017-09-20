@@ -864,7 +864,6 @@ class OrderedChoices(Choices):
         super(OrderedChoices, self).__init__(*choices, **kwargs)
 
 
-
 def create_choice(klass, choices, subsets, kwargs):
     """Create an instance of a ``Choices`` object.
 

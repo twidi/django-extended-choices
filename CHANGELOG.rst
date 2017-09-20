@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+---------------------------------
+* add ``__all__`` at package root
+* supports Django 1.8, 1.9, 1.10 and 1.11
+* follow the latests django/python support matrix
+* tested on travis via tox (tests, pep8 validation and code coverage)
+
 Release *v1.1.1* - ``2016-11-03``
 ---------------------------------
 * make ``OrderedChoices`` available at the package root
