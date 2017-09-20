@@ -303,12 +303,21 @@ License
 
 Available under the BSD_ License. See the ``LICENSE`` file included
 
-Python 3?
+Python versions support
 ---------
 
-Of course! We support python ``2.6``, ``2.7``, ``3.3``, ``3.4`` and ``3.5``, for Django version
-``1.5.x`` to ``1.10.x``, respecting the `Django matrix`_ (except for python ``2.5`` and ``3.2``
-which are not supported by ``django-extended-choices``)
+``django-extended-choices`` Python support follow the `Django Python support matrix`_:
+
+
++----------------+-------------------------------------------------+
+| Django version | Python versions                                 |
++----------------+-------------------------------------------------+
+| 1.8            | 2.7, 3.2 (until the end of 2016), 3.3, 3.4, 3.5 |
++----------------+-------------------------------------------------+
+| 1.9, 1.10      | 2.7, 3.4, 3.5                                   |
++----------------+-------------------------------------------------+
+| 1.11           | 2.7, 3.4, 3.5, 3.6                              |
++----------------+-------------------------------------------------+
 
 
 Tests
@@ -369,7 +378,7 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 .. _choices: http://docs.djangoproject.com/en/1.5/ref/models/fields/#choices
 .. _Django: http://www.djangoproject.com/
 .. _Github: https://github.com/twidi/django-extended-choices
-.. _Django matrix: https://docs.djangoproject.com/en/1.8/faq/install/#what-python-version-can-i-use-with-django
+.. _Django Python support matrix: https://docs.djangoproject.com/en/1.11/faq/install/#what-python-version-can-i-use-with-django
 .. _TravisCi: https://travis-ci.org/twidi/django-extended-choices/pull_requests
 .. _ReadTheDoc: http://django-extended-choices.readthedocs.org
 .. _BSD: http://opensource.org/licenses/BSD-3-Clause
