@@ -5,7 +5,7 @@ from future.builtins import str
 from os import path
 from setuptools.config import read_configuration
 
-from .choices import Choices, OrderedChoices  # noqa: F401
+from .choices import Choices, OrderedChoices, AutoDisplayChoices, AutoChoices  # noqa: F401
 
 
 def _extract_version(package_name):

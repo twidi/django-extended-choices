@@ -34,7 +34,7 @@ from django.core.exceptions import ValidationError
 from django.utils.functional import Promise
 from django.utils.translation import ugettext_lazy
 
-from .choices import Choices, OrderedChoices
+from .choices import Choices, OrderedChoices, AutoDisplayChoices, AutoChoices
 from .fields import NamedExtendedChoiceFormField
 from .helpers import ChoiceAttributeMixin, ChoiceEntry
 
@@ -900,6 +900,152 @@ class ChoiceEntryTestCase(BaseTestCase):
 
         with self.assertRaises(ValueError):
             ChoiceEntry(('FOO', None, 'foo'))
+
+
+class AutoDisplayChoicesTestCase(BaseTestCase):
+
+    def test_normal_usage(self):
+
+        MY_CHOICES = AutoDisplayChoices(
+            ('SIMPLE', 1),
+            ('NOT_SIMPLE', 2),
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'Simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
+
+    def test_invalid_tuples(self):
+        with self.assertRaises(AssertionError):
+            AutoDisplayChoices(
+                ('SIMPLE', ),
+            )
+        with self.assertRaises(AssertionError):
+            AutoDisplayChoices(
+                ('SIMPLE', 1, 'Simple'),
+            )
+        with self.assertRaises(AssertionError):
+            AutoDisplayChoices(
+                ('SIMPLE', 1, 'Simple', 'foo'),
+            )
+
+    def test_with_attributes(self):
+
+        MY_CHOICES = AutoDisplayChoices(
+            ('SIMPLE', 1),
+            ('NOT_SIMPLE', 2, {'additional': 'attributes'}),
+        )
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.choice_entry.additional, 'attributes')
+
+    def test_pass_transform_function(self):
+
+        MY_CHOICES = AutoDisplayChoices(
+            ('SIMPLE', 1),
+            ('NOT_SIMPLE', 2),
+            display_transform=lambda const: const.lower()
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'not_simple')
+
+    def test_override_transform_function(self):
+
+        class MyAutoDisplayChoices(AutoDisplayChoices):
+            display_transform = staticmethod(lambda const: const.lower())
+
+        MY_CHOICES = MyAutoDisplayChoices(
+            ('SIMPLE', 1),
+            ('NOT_SIMPLE', 2),
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'not_simple')
+
+        MY_CHOICES = MyAutoDisplayChoices(
+            ('SIMPLE', 1),
+            ('NOT_SIMPLE', 2),
+            display_transform=lambda const: const.title()
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'Simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not_Simple')
+
+
+class AutoChoicesTestCase(BaseTestCase):
+
+    def test_normal_usage(self):
+
+        MY_CHOICES = AutoChoices(
+            'SIMPLE',
+            ('NOT_SIMPLE', ),
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'Simple')
+        self.assertEqual(MY_CHOICES.SIMPLE.value, 'simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'not_simple')
+
+    def test_invalid_tuples(self):
+        with self.assertRaises(AssertionError):
+            AutoChoices(
+                ('SIMPLE', 1),
+            )
+        with self.assertRaises(AssertionError):
+            AutoChoices(
+                ('SIMPLE', 1, 'Simple'),
+            )
+
+    def test_with_attributes(self):
+
+        MY_CHOICES = AutoChoices(
+            'SIMPLE',
+            ('NOT_SIMPLE', {'additional': 'attributes'}),
+        )
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'not_simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.choice_entry.additional, 'attributes')
+
+    def test_pass_transform_functions(self):
+
+        MY_CHOICES = AutoChoices(
+            'SIMPLE',
+            ('NOT_SIMPLE', ),
+            display_transform=lambda const: const.lower(),
+            value_transform=lambda const: const[::-1]
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'simple')
+        self.assertEqual(MY_CHOICES.SIMPLE.value, 'ELPMIS')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'not_simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'ELPMIS_TON')
+
+    def test_override_transform_functions(self):
+
+        class MyAutoChoices(AutoChoices):
+            display_transform = staticmethod(lambda const: const.lower())
+            value_transform = staticmethod(lambda const: const.lower()[::-1])
+
+        MY_CHOICES = MyAutoChoices(
+            'SIMPLE',
+            ('NOT_SIMPLE', ),
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'simple')
+        self.assertEqual(MY_CHOICES.SIMPLE.value, 'elpmis')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'not_simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'elpmis_ton')
+
+        MY_CHOICES = MyAutoChoices(
+            'SIMPLE',
+            ('NOT_SIMPLE', ),
+            display_transform=lambda const: const.title(),
+            value_transform=lambda const: const.title()[::-1]
+        )
+
+        self.assertEqual(MY_CHOICES.SIMPLE.display, 'Simple')
+        self.assertEqual(MY_CHOICES.SIMPLE.value, 'elpmiS')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not_Simple')
+        self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'elpmiS_toN')
 
 
 if __name__ == "__main__":

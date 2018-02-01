@@ -178,8 +178,9 @@ If you want these dicts to be ordered, you can pass the dict class to use to the
         dict_class = OrderedDict
     )
 
-Since version ``1.1``, the new ``OrderedChoices`` class is provided, that is exactly that:
-a ``Choices`` using ``OrderedDict`` by default for ``dict_class``.
+Since version ``1.1``, the new ``OrderedChoices``class is provided, that is exactly that:
+a ``Choices`` using ``OrderedDict`` by default for ``dict_class``. You can directly import
+it from ``extended_choices``.
 
 You can check if a constant, value, or display name exists:
 
@@ -295,8 +296,115 @@ of the choice entry
     ...     ('EARTH', 'earth', 'Earth', {'color': 'blue'}),
     ...     ('MARS', 'mars', 'Mars', {'color': 'red'}),
     ... )
-    >>> PLANETS.EARTH.color
+    >>> PLANETS.EARTH.choice_entry.color
     'blue'
+
+
+Auto display/value
+------------------
+
+We provide two classes to eases the writing of your choices, attended you don't need translation on the display value.
+
+AutoChoices
+'''''''''''
+
+It's the simpler and faster version: you just past constants and:
+
+- the value saved in database will be constant lower cased
+- the display value will be the constant with ``_`` replaced by spaces, and the first letter capitalized
+
+.. code-block:: python
+
+    >>> from extended_choices import AutoChoices
+    >>> PLANETS = AutoChoices('EARTH', 'MARS')
+    >>> PLANETS.EARTH.value
+    'earth'
+    >>> PLANETS.MARS.display
+    'Mars'
+
+If you want to pass additional attributes, pass a tuple with the dict as a last element:
+
+
+.. code-block:: python
+
+    >>> PLANETS = AutoChoices(
+    ...     ('EARTH', {'color': 'blue'}),
+    ...     ('MARS', {'color': 'red'}),
+    ... )
+    >>> PLANETS.EARTH.value
+    'earth'
+    >>> PLANETS.EARTH.choice_entry.color
+    'blue'
+
+
+You can change the transform function used to convert the constant to the value to be saved and the display value, by passing
+``value_transform`` and ``display_transform`` functions to the constructor.
+
+.. code-block:: python
+
+    >>> PLANETS = AutoChoices(
+    ...     'EARTH', 'MARS',
+    ...     value_transform=lambda const: 'planet_' + const.lower().
+    ...     display_transform=lambda const: 'Planet: ' + const.lower().
+    ... )
+    >>> PLANETS.EARTH.value
+    'planet_earth'
+    >>> PLANETS.MARS.display
+    'Planet: mars'
+
+
+If you find yourself repeting these transform functions you can have a base class that defines these function, as class attributes:
+
+.. code-block:: python
+
+    >>> class MyAutoChoices(AutoChoices):
+    ...     value_transform=staticmethod(lambda const: const.upper())
+    ...     display_transform=staticmethod(lambda const: const.lower())
+
+    >>> PLANETS = MyAutoChoices('EARTH', 'MARS')
+    >>> PLANETS.EARTH.value
+    'EARTH'
+    >>> PLANETS.MARS.dispay
+    'mars'
+
+Of course you can still override the functions by passing them to the constructor.
+
+AutoDisplayChoices
+''''''''''''''''''
+
+In this version, you have to define the value to save in database. The display value will be composed like in ``AutoChoices``
+
+.. code-block:: python
+
+    >>> from extended_choices import AutoDisplayChoices
+    >>> PLANETS = AutoDisplayChoices(
+    ...     ('EARTH', 1),
+    ...     ('MARS', 2),
+    ... )
+    >>> PLANETS.EARTH.value
+    1
+    >>> PLANETS.MARS.display
+    'Mars'
+
+If you want to pass additional attributes, pass a tuple with the dict as a last element:
+
+
+.. code-block:: python
+
+    >>> PLANETS = AutoDisplayChoices(
+    ...     ('EARTH', 'earth', {'color': 'blue'}),
+    ...     ('MARS', 'mars', {'color': 'red'}),
+    ... )
+    >>> PLANETS.EARTH.value
+    1
+    >>> PLANETS.EARTH.display
+    'Earth'
+    >>> PLANETS.EARTH.choice_entry.color
+    'blue'
+
+
+As in ``AutoChoices``, you can change the transform function for the value to display by passing ``display_transform`` to the
+constructor.
 
 Notes
 -----
