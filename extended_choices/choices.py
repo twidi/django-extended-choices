@@ -62,10 +62,19 @@ from __future__ import unicode_literals
 from past.builtins import basestring
 
 from collections import OrderedDict
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 
 from .helpers import ChoiceEntry
 
-__all__ = ['Choices']
+__all__ = [
+    'Choices',
+    'OrderedChoices',
+    'AutoDisplayChoices',
+    'AutoChoices',
+]
 
 
 class Choices(list):
@@ -857,6 +866,117 @@ class OrderedChoices(Choices):
             kwargs['dict_class'] = OrderedDict
 
         super(OrderedChoices, self).__init__(*choices, **kwargs)
+
+
+class AutoDisplayChoices(OrderedChoices):
+    """Subclass of ``OrderedChoices`` that will compose the display value based on the constant.
+
+    To compose the display value, it will call a  ``display_transform`` function, that is defined
+    as a class attribute but can be overridden by     passing it to the constructor.
+
+    Example
+    -------
+
+    >>> ALIGNMENTS = AutoDisplayChoices(
+    ...     ('BAD', 10),
+    ...     ('NEUTRAL', 20),
+    ...     ('CHAOTIC_GOOD', 30),
+    ...     ('GOOD', 40, {'additional': 'attributes'}),
+    ... )
+
+    >>> ALIGNMENTS.BAD.display
+    'Bad'
+    >>> ALIGNMENTS.NEUTRAL.choice_entry
+    ('NEUTRAL', 20, 'Neutral')
+    >>> ALIGNMENTS.CHAOTIC_GOOD.display
+    'Chaotic good'
+    >>> ALIGNMENTS.GOOD.choice_entry.additional
+    'attributes'
+
+    """
+
+    display_transform = staticmethod(lambda const: const.lower().replace('_', ' ').capitalize())
+
+    def __init__(self, *choices, **kwargs):
+
+        display_transform = kwargs.pop('display_transform', None) or self.display_transform
+
+        final_choices = []
+        for choice in choices:
+            assert 2 <= len(choice) <= 3, 'Invalid number of entries in %s' % (choice,)
+
+            if len(choice) == 3:
+                assert isinstance(choice[2], Mapping), 'Last argument must be a dict-like object in %s' % (choice,)
+            else:
+                assert len(choice) == 2, \
+                    '%s accepts tuples with constant and value (and optional dict for additional attributes) in ' % (
+                        self.__class__.__name__, choice,)
+
+            final_choice = list(choice)
+            final_choice.insert(2, display_transform(choice[0]))
+            final_choices.append(final_choice)
+
+        super(AutoDisplayChoices, self).__init__(*final_choices, **kwargs)
+
+
+class AutoChoices(AutoDisplayChoices):
+    """Subclass of ``AutoDisplayChoices`` that will also compose the value to be saved based on the constant.
+
+    To compose the display value, it will call a  ``display_transform`` function, that is defined
+    as a class attribute but can be overridden by     passing it to the constructor.
+
+    In this class, the ``*choices`` argument can simply be strings, or tuples with one element (or two
+    to add additional attributes)
+
+    Example
+    -------
+
+    >>> ALIGNMENTS = AutoChoices(
+    ...     'BAD',
+    ...     ('NEUTRAL', ),
+    ...     'CHAOTIC_GOOD',
+    ...     ('GOOD', {'additional': 'attributes'}),
+    ... )
+
+    >>> ALIGNMENTS.BAD.value
+    'bad'
+    >>> ALIGNMENTS.BAD.display
+    'Bad'
+    >>> ALIGNMENTS.NEUTRAL.choice_entry
+    ('NEUTRAL', 'neutral', 'Neutral')
+    >>> ALIGNMENTS.CHAOTIC_GOOD.choice_entry
+    ('CHAOTIC_GOOD', 'chaotic_good', 'Chaotic good')
+    >>> ALIGNMENTS.GOOD.choice_entry.additional
+    'attributes'
+
+    """
+
+    value_transform = staticmethod(lambda const: const.lower())
+
+    def __init__(self, *choices, **kwargs):
+
+        value_transform = kwargs.pop('value_transform', None) or self.value_transform
+
+        final_choices = []
+        for choice in choices:
+            original_choice = choice
+            if isinstance(choice, basestring):
+                choice = (choice, )
+
+            assert 1 <= len(choice) <= 2, 'Invalid number of entries in %s' % (original_choice,)
+
+            if len(choice) == 2:
+                assert isinstance(choice[1], Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
+            else:
+                assert len(choice) == 1, \
+                    '%s accepts tuples with constant only (and optional dict for additional attributes) in ' % (
+                        self.__class__.__name__, original_choice,)
+
+            final_choice = list(choice)
+            final_choice.insert(1, value_transform(choice[0]))
+            final_choices.append(final_choice)
+
+        super(AutoChoices, self).__init__(*final_choices, **kwargs)
 
 
 def create_choice(klass, choices, subsets, kwargs):
