@@ -283,6 +283,21 @@ from the original ``Choices`` object.
 Note that in ``extract_subset``, you pass the strings directly, not in a list/tuple as for the
 second argument of ``add_subset``.
 
+Additional attributes
+---------------------
+
+Each tuple must contain three elements. But you can pass a dict as a fourth one and each entry of this dict will be saved as an attribute
+of the choice entry
+
+.. code-block:: python
+
+    >>> PLANETS = Choices(
+    ...     ('EARTH', 'earth', 'Earth', {'color': 'blue'}),
+    ...     ('MARS', 'mars', 'Mars', {'color': 'red'}),
+    ... )
+    >>> PLANETS.EARTH.color
+    'blue'
+
 Notes
 -----
 
