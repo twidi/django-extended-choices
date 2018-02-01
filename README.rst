@@ -303,16 +303,14 @@ License
 
 Available under the BSD_ License. See the ``LICENSE`` file included
 
-Python versions support
----------
-
-``django-extended-choices`` Python support follow the `Django Python support matrix`_:
+Python/Django versions support
+------------------------------
 
 
 +----------------+-------------------------------------------------+
 | Django version | Python versions                                 |
 +----------------+-------------------------------------------------+
-| 1.8            | 2.7, 3.2 (until the end of 2016), 3.3, 3.4, 3.5 |
+| 1.8            | 2.7, 3.4, 3.5                                   |
 +----------------+-------------------------------------------------+
 | 1.9, 1.10      | 2.7, 3.4, 3.5                                   |
 +----------------+-------------------------------------------------+
@@ -378,7 +376,6 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 .. _choices: http://docs.djangoproject.com/en/1.5/ref/models/fields/#choices
 .. _Django: http://www.djangoproject.com/
 .. _Github: https://github.com/twidi/django-extended-choices
-.. _Django Python support matrix: https://docs.djangoproject.com/en/1.11/faq/install/#what-python-version-can-i-use-with-django
 .. _TravisCi: https://travis-ci.org/twidi/django-extended-choices/pull_requests
 .. _ReadTheDoc: http://django-extended-choices.readthedocs.org
 .. _BSD: http://opensource.org/licenses/BSD-3-Clause
