@@ -59,14 +59,9 @@ The documentation format in this file is numpydoc_.
 """
 
 from __future__ import unicode_literals
-
-import sys
 from past.builtins import basestring
 
-if sys.version_info >= (2, 7):
-    from collections import OrderedDict
-else:
-    from django.utils.datastructures import SortedDict as OrderedDict
+from collections import OrderedDict
 
 from .helpers import ChoiceEntry
 
@@ -891,11 +886,3 @@ def create_choice(klass, choices, subsets, kwargs):
     for subset in subsets:
         obj.add_subset(*subset)
     return obj
-
-
-if __name__ == '__main__':
-    # pylint: disable=wrong-import-position,wrong-import-order
-    import doctest
-    doctest.testmod(report=True)
-    from . import helpers
-    doctest.testmod(m=helpers, report=True)
