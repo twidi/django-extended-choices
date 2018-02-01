@@ -12,6 +12,10 @@ The documentation format in this file is numpydoc_.
 from __future__ import unicode_literals
 
 from builtins import object  # pylint: disable=redefined-builtin
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 
 from django.utils.functional import Promise
 
@@ -283,6 +287,7 @@ class ChoiceEntry(tuple):
 
         # Add additional attributes.
         if len(tuple_) == 4:
+            assert isinstance(tuple_[3], Mapping), 'Last argument must be a dict-like object in %s' % (tuple_,)
             for key, value in tuple_[3].items():
                 setattr(obj, key, value)
 
