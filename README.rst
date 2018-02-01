@@ -178,8 +178,9 @@ If you want these dicts to be ordered, you can pass the dict class to use to the
         dict_class = OrderedDict
     )
 
-Since version ``1.1``, the new ``OrderedChoices`` class is provided, that is exactly that:
-a ``Choices`` using ``OrderedDict`` by default for ``dict_class``.
+Since version ``1.1``, the new ``OrderedChoices``class is provided, that is exactly that:
+a ``Choices`` using ``OrderedDict`` by default for ``dict_class``. You can directly import
+it from ``extended_choices``.
 
 You can check if a constant, value, or display name exists:
 
@@ -283,6 +284,128 @@ from the original ``Choices`` object.
 Note that in ``extract_subset``, you pass the strings directly, not in a list/tuple as for the
 second argument of ``add_subset``.
 
+Additional attributes
+---------------------
+
+Each tuple must contain three elements. But you can pass a dict as a fourth one and each entry of this dict will be saved as an attribute
+of the choice entry
+
+.. code-block:: python
+
+    >>> PLANETS = Choices(
+    ...     ('EARTH', 'earth', 'Earth', {'color': 'blue'}),
+    ...     ('MARS', 'mars', 'Mars', {'color': 'red'}),
+    ... )
+    >>> PLANETS.EARTH.choice_entry.color
+    'blue'
+
+
+Auto display/value
+------------------
+
+We provide two classes to eases the writing of your choices, attended you don't need translation on the display value.
+
+AutoChoices
+'''''''''''
+
+It's the simpler and faster version: you just past constants and:
+
+- the value saved in database will be constant lower cased
+- the display value will be the constant with ``_`` replaced by spaces, and the first letter capitalized
+
+.. code-block:: python
+
+    >>> from extended_choices import AutoChoices
+    >>> PLANETS = AutoChoices('EARTH', 'MARS')
+    >>> PLANETS.EARTH.value
+    'earth'
+    >>> PLANETS.MARS.display
+    'Mars'
+
+If you want to pass additional attributes, pass a tuple with the dict as a last element:
+
+
+.. code-block:: python
+
+    >>> PLANETS = AutoChoices(
+    ...     ('EARTH', {'color': 'blue'}),
+    ...     ('MARS', {'color': 'red'}),
+    ... )
+    >>> PLANETS.EARTH.value
+    'earth'
+    >>> PLANETS.EARTH.choice_entry.color
+    'blue'
+
+
+You can change the transform function used to convert the constant to the value to be saved and the display value, by passing
+``value_transform`` and ``display_transform`` functions to the constructor.
+
+.. code-block:: python
+
+    >>> PLANETS = AutoChoices(
+    ...     'EARTH', 'MARS',
+    ...     value_transform=lambda const: 'planet_' + const.lower().
+    ...     display_transform=lambda const: 'Planet: ' + const.lower().
+    ... )
+    >>> PLANETS.EARTH.value
+    'planet_earth'
+    >>> PLANETS.MARS.display
+    'Planet: mars'
+
+
+If you find yourself repeting these transform functions you can have a base class that defines these function, as class attributes:
+
+.. code-block:: python
+
+    >>> class MyAutoChoices(AutoChoices):
+    ...     value_transform=staticmethod(lambda const: const.upper())
+    ...     display_transform=staticmethod(lambda const: const.lower())
+
+    >>> PLANETS = MyAutoChoices('EARTH', 'MARS')
+    >>> PLANETS.EARTH.value
+    'EARTH'
+    >>> PLANETS.MARS.dispay
+    'mars'
+
+Of course you can still override the functions by passing them to the constructor.
+
+AutoDisplayChoices
+''''''''''''''''''
+
+In this version, you have to define the value to save in database. The display value will be composed like in ``AutoChoices``
+
+.. code-block:: python
+
+    >>> from extended_choices import AutoDisplayChoices
+    >>> PLANETS = AutoDisplayChoices(
+    ...     ('EARTH', 1),
+    ...     ('MARS', 2),
+    ... )
+    >>> PLANETS.EARTH.value
+    1
+    >>> PLANETS.MARS.display
+    'Mars'
+
+If you want to pass additional attributes, pass a tuple with the dict as a last element:
+
+
+.. code-block:: python
+
+    >>> PLANETS = AutoDisplayChoices(
+    ...     ('EARTH', 'earth', {'color': 'blue'}),
+    ...     ('MARS', 'mars', {'color': 'red'}),
+    ... )
+    >>> PLANETS.EARTH.value
+    1
+    >>> PLANETS.EARTH.display
+    'Earth'
+    >>> PLANETS.EARTH.choice_entry.color
+    'blue'
+
+
+As in ``AutoChoices``, you can change the transform function for the value to display by passing ``display_transform`` to the
+constructor.
+
 Notes
 -----
 
@@ -303,20 +426,20 @@ License
 
 Available under the BSD_ License. See the ``LICENSE`` file included
 
-Python versions support
----------
-
-``django-extended-choices`` Python support follow the `Django Python support matrix`_:
+Python/Django versions support
+------------------------------
 
 
 +----------------+-------------------------------------------------+
 | Django version | Python versions                                 |
 +----------------+-------------------------------------------------+
-| 1.8            | 2.7, 3.2 (until the end of 2016), 3.3, 3.4, 3.5 |
+| 1.8            | 2.7, 3.4, 3.5                                   |
 +----------------+-------------------------------------------------+
 | 1.9, 1.10      | 2.7, 3.4, 3.5                                   |
 +----------------+-------------------------------------------------+
 | 1.11           | 2.7, 3.4, 3.5, 3.6                              |
++----------------+-------------------------------------------------+
+| 2.0            | 3.4, 3.5, 3.6                                   |
 +----------------+-------------------------------------------------+
 
 
@@ -330,7 +453,7 @@ To run tests from the code source, create a virtualenv or activate one, install 
 
 We also provides some quick doctests in the code documentation. To execute them::
 
-    python -m extended_choices.choices
+    python -m extended_choices
 
 
 Note: the doctests will work only in python version not display `u` prefix for strings.
@@ -378,7 +501,6 @@ Written by Stephane "Twidi" Angel <s.angel@twidi.com> (http://twidi.com), origin
 .. _choices: http://docs.djangoproject.com/en/1.5/ref/models/fields/#choices
 .. _Django: http://www.djangoproject.com/
 .. _Github: https://github.com/twidi/django-extended-choices
-.. _Django Python support matrix: https://docs.djangoproject.com/en/1.11/faq/install/#what-python-version-can-i-use-with-django
 .. _TravisCi: https://travis-ci.org/twidi/django-extended-choices/pull_requests
 .. _ReadTheDoc: http://django-extended-choices.readthedocs.org
 .. _BSD: http://opensource.org/licenses/BSD-3-Clause
