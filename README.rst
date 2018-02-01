@@ -330,7 +330,7 @@ To run tests from the code source, create a virtualenv or activate one, install 
 
 We also provides some quick doctests in the code documentation. To execute them::
 
-    python -m extended_choices.choices
+    python -m extended_choices
 
 
 Note: the doctests will work only in python version not display `u` prefix for strings.

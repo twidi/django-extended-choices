@@ -886,11 +886,3 @@ def create_choice(klass, choices, subsets, kwargs):
     for subset in subsets:
         obj.add_subset(*subset)
     return obj
-
-
-if __name__ == '__main__':
-    # pylint: disable=wrong-import-position,wrong-import-order
-    import doctest
-    doctest.testmod(report=True)
-    from . import helpers
-    doctest.testmod(m=helpers, report=True)
