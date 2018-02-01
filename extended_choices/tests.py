@@ -21,10 +21,7 @@ try:
 except ImportError:
     import pickle
 
-if sys.version_info >= (2, 7):
-    import unittest
-else:
-    import unittest2 as unittest
+import unittest
 
 import django
 

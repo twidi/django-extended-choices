@@ -59,14 +59,9 @@ The documentation format in this file is numpydoc_.
 """
 
 from __future__ import unicode_literals
-
-import sys
 from past.builtins import basestring
 
-if sys.version_info >= (2, 7):
-    from collections import OrderedDict
-else:
-    from django.utils.datastructures import SortedDict as OrderedDict
+from collections import OrderedDict
 
 from .helpers import ChoiceEntry
 
