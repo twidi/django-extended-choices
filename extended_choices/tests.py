@@ -13,7 +13,6 @@ The documentation format in this file is numpydoc_.
 
 from __future__ import unicode_literals
 
-import sys
 from copy import copy, deepcopy
 
 try:
@@ -21,15 +20,11 @@ try:
 except ImportError:
     import pickle
 
+from collections import OrderedDict
 import unittest
 
 import django
 
-# Use an ordered dict, from python or django depending on the python version.
-if sys.version_info >= (2, 7):
-    from collections import OrderedDict
-else:
-    from django.utils.datastructures import SortedDict as OrderedDict
 
 # Minimal django conf to test a real field.
 from django.conf import settings
