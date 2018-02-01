@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Release *v1.2* - ``2018-02-01``
+-------------------------------
+* add ``AutoChoices`` and ``AutoDisplayChoices``
+* document the fourth argument to tuples to pass additional attributes
+* remove support for Python 3.3
+* add support for Django 2.0
+
 Release *v1.1.2* - ``2017-09-20``
 ---------------------------------
 * add ``__all__`` at package root
