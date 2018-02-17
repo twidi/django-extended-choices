@@ -709,6 +709,16 @@ class ChoicesTestCase(BaseTestCase):
         self.assertIsInstance(ordered_choices.values, OrderedDict)
         self.assertIsInstance(ordered_choices.displays, OrderedDict)
 
+    def test_passing_choice_entry(self):
+        MY_CHOICES = Choices(
+            ChoiceEntry(('A', 'aa', 'aaa', {'foo': 'bar'})),
+            ('B', 'bb', 'bbb'),
+        )
+        self.assertEqual(MY_CHOICES.A.value, 'aa')
+        self.assertEqual(MY_CHOICES.A.display, 'aaa')
+        self.assertEqual(MY_CHOICES.B.value, 'bb')
+        self.assertEqual(MY_CHOICES.B.display, 'bbb')
+
 
 class ChoiceAttributeMixinTestCase(BaseTestCase):
     """Test the ``ChoiceAttributeMixin`` class."""
@@ -970,6 +980,27 @@ class AutoDisplayChoicesTestCase(BaseTestCase):
         self.assertEqual(MY_CHOICES.SIMPLE.display, 'Simple')
         self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not_Simple')
 
+    def test_adding_subset(self):
+
+        MY_CHOICES = AutoDisplayChoices(('A', 'a'), ('B', 'b'), ('C', 'c'))
+        MY_CHOICES.add_subset('AB', ['A', 'B'])
+
+        self.assertEqual(MY_CHOICES.AB.constants, {
+            'A': MY_CHOICES.A.choice_entry,
+            'B': MY_CHOICES.B.choice_entry,
+        })
+
+    def test_passing_choice_entry(self):
+        MY_CHOICES = AutoDisplayChoices(
+            ChoiceEntry(('A', 'aa', 'aaa', {'foo': 'bar'})),
+            ('B', 'bb'),
+        )
+        self.assertEqual(MY_CHOICES.A.value, 'aa')
+        self.assertEqual(MY_CHOICES.A.display, 'aaa')
+        self.assertEqual(MY_CHOICES.B.value, 'bb')
+        self.assertEqual(MY_CHOICES.B.display, 'B')
+
+
 
 class AutoChoicesTestCase(BaseTestCase):
 
@@ -1046,6 +1077,26 @@ class AutoChoicesTestCase(BaseTestCase):
         self.assertEqual(MY_CHOICES.SIMPLE.value, 'elpmiS')
         self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not_Simple')
         self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'elpmiS_toN')
+
+    def test_adding_subset(self):
+
+        MY_CHOICES = AutoChoices('A', 'B', 'C')
+        MY_CHOICES.add_subset('AB', ['A', 'B'])
+
+        self.assertEqual(MY_CHOICES.AB.constants, {
+            'A': MY_CHOICES.A.choice_entry,
+            'B': MY_CHOICES.B.choice_entry,
+        })
+
+    def test_passing_choice_entry(self):
+        MY_CHOICES = AutoChoices(
+            ChoiceEntry(('A', 'aa', 'aaa', {'foo': 'bar'})),
+            'B',
+        )
+        self.assertEqual(MY_CHOICES.A.value, 'aa')
+        self.assertEqual(MY_CHOICES.A.display, 'aaa')
+        self.assertEqual(MY_CHOICES.B.value, 'b')
+        self.assertEqual(MY_CHOICES.B.display, 'B')
 
 
 if __name__ == "__main__":

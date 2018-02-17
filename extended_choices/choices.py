@@ -76,6 +76,8 @@ __all__ = [
     'AutoChoices',
 ]
 
+_NO_SUBSET_NAME_ = '__NO_SUBSET_NAME__'
+
 
 class Choices(list):
     """Helper class for choices fields in Django
@@ -234,6 +236,77 @@ class Choices(list):
         """
         return tuple(self)
 
+    def _convert_choices(self, choices):
+        """Validate each choices
+
+        Parameters
+        ----------
+        choices : list of tuples
+            The list of choices to be added
+
+        Returns
+        -------
+        list
+            The list of the added constants
+
+        """
+
+        # Check that each new constant is unique.
+        constants = [c[0] for c in choices]
+        constants_doubles = [c for c in constants if constants.count(c) > 1]
+        if constants_doubles:
+            raise ValueError("You cannot declare two constants with the same constant name. "
+                             "Problematic constants: %s " % list(set(constants_doubles)))
+
+        # Check that none of the new constants already exists.
+        bad_constants = set(constants).intersection(self.constants)
+        if bad_constants:
+            raise ValueError("You cannot add existing constants. "
+                             "Existing constants: %s." % list(bad_constants))
+
+        # Check that none of the constant is an existing attributes
+        bad_constants = [c for c in constants if hasattr(self, c)]
+        if bad_constants:
+            raise ValueError("You cannot add constants that already exists as attributes. "
+                             "Existing attributes: %s." % list(bad_constants))
+
+        # Check that each new value is unique.
+        values = [c[1] for c in choices]
+        values_doubles = [c for c in values if values.count(c) > 1]
+        if values_doubles:
+            raise ValueError("You cannot declare two choices with the same name."
+                             "Problematic values: %s " % list(set(values_doubles)))
+
+        # Check that none of the new values already exists.
+        bad_values = set(values).intersection(self.values)
+        if bad_values:
+            raise ValueError("You cannot add existing values. "
+                             "Existing values: %s." % list(bad_values))
+
+        # We can now add each choice.
+        for choice_tuple in choices:
+
+            # Convert the choice tuple in a ``ChoiceEntry`` instance if it's not already done.
+            # It allows to share choice entries between a ``Choices`` instance and its subsets.
+            choice_entry = choice_tuple
+            if not isinstance(choice_entry, self.ChoiceEntryClass):
+                choice_entry = self.ChoiceEntryClass(choice_entry)
+
+            # Append to the main list the choice as expected by django: (value, display name).
+            self.append(choice_entry.choice)
+            # And the ``ChoiceEntry`` instance to our own internal list.
+            self.entries.append(choice_entry)
+
+            # Make the value accessible via an attribute (the constant being its name).
+            setattr(self, choice_entry.constant, choice_entry.value)
+
+            # Fill dicts to access the ``ChoiceEntry`` instance by its constant, value or display..
+            self.constants[choice_entry.constant] = choice_entry
+            self.values[choice_entry.value] = choice_entry
+            self.displays[choice_entry.display] = choice_entry
+
+        return constants
+
     def add_choices(self, *choices, **kwargs):
         """Add some choices to the current ``Choices`` instance.
 
@@ -297,7 +370,7 @@ class Choices(list):
 
         # Check for an optional subset name as the first argument (so the first entry of *choices).
         subset_name = None
-        if choices and isinstance(choices[0], basestring):
+        if choices and isinstance(choices[0], basestring) and choices[0] != _NO_SUBSET_NAME_:
             subset_name = choices[0]
             choices = choices[1:]
 
@@ -308,59 +381,7 @@ class Choices(list):
                                  "argument and also as a named argument")
             subset_name = kwargs['name']
 
-        # Check that each new constant is unique.
-        constants = [c[0] for c in choices]
-        constants_doubles = [c for c in constants if constants.count(c) > 1]
-        if constants_doubles:
-            raise ValueError("You cannot declare two constants with the same constant name. "
-                             "Problematic constants: %s " % list(set(constants_doubles)))
-
-        # Check that none of the new constants already exists.
-        bad_constants = set(constants).intersection(self.constants)
-        if bad_constants:
-            raise ValueError("You cannot add existing constants. "
-                             "Existing constants: %s." % list(bad_constants))
-
-        # Check that none of the constant is an existing attributes
-        bad_constants = [c for c in constants if hasattr(self, c)]
-        if bad_constants:
-            raise ValueError("You cannot add constants that already exists as attributes. "
-                             "Existing attributes: %s." % list(bad_constants))
-
-        # Check that each new value is unique.
-        values = [c[1] for c in choices]
-        values_doubles = [c for c in values if values.count(c) > 1]
-        if values_doubles:
-            raise ValueError("You cannot declare two choices with the same name."
-                             "Problematic values: %s " % list(set(values_doubles)))
-
-        # Check that none of the new values already exists.
-        bad_values = set(values).intersection(self.values)
-        if bad_values:
-            raise ValueError("You cannot add existing values. "
-                             "Existing values: %s." % list(bad_values))
-
-        # We can now add each choice.
-        for choice_tuple in choices:
-
-            # Convert the choice tuple in a ``ChoiceEntry`` instance if it's not already done.
-            # It allows to share choice entries between a ``Choices`` instance and its subsets.
-            choice_entry = choice_tuple
-            if not isinstance(choice_entry, self.ChoiceEntryClass):
-                choice_entry = self.ChoiceEntryClass(choice_entry)
-
-            # Append to the main list the choice as expected by django: (value, display name).
-            self.append(choice_entry.choice)
-            # And the ``ChoiceEntry`` instance to our own internal list.
-            self.entries.append(choice_entry)
-
-            # Make the value accessible via an attribute (the constant being its name).
-            setattr(self, choice_entry.constant, choice_entry.value)
-
-            # Fill dicts to access the ``ChoiceEntry`` instance by its constant, value or display..
-            self.constants[choice_entry.constant] = choice_entry
-            self.values[choice_entry.value] = choice_entry
-            self.displays[choice_entry.display] = choice_entry
+        constants = self._convert_choices(choices)
 
         # If we have a subset name, create a new subset with all the given constants.
         if subset_name:
@@ -898,11 +919,19 @@ class AutoDisplayChoices(OrderedChoices):
     display_transform = staticmethod(lambda const: const.lower().replace('_', ' ').capitalize())
 
     def __init__(self, *choices, **kwargs):
+        self.display_transform = kwargs.pop('display_transform', None) or self.display_transform
+        super(AutoDisplayChoices, self).__init__(*choices, **kwargs)
 
-        display_transform = kwargs.pop('display_transform', None) or self.display_transform
+    def _convert_choices(self, choices):
+        """Auto create display values then call super method"""
 
         final_choices = []
         for choice in choices:
+
+            if isinstance(choice, ChoiceEntry):
+                final_choices.append(choice)
+                continue
+
             assert 2 <= len(choice) <= 3, 'Invalid number of entries in %s' % (choice,)
 
             if len(choice) == 3:
@@ -913,10 +942,10 @@ class AutoDisplayChoices(OrderedChoices):
                         self.__class__.__name__, choice,)
 
             final_choice = list(choice)
-            final_choice.insert(2, display_transform(choice[0]))
+            final_choice.insert(2, self.display_transform(choice[0]))
             final_choices.append(final_choice)
 
-        super(AutoDisplayChoices, self).__init__(*final_choices, **kwargs)
+        return super(AutoDisplayChoices, self)._convert_choices(final_choices)
 
 
 class AutoChoices(AutoDisplayChoices):
@@ -954,13 +983,27 @@ class AutoChoices(AutoDisplayChoices):
     value_transform = staticmethod(lambda const: const.lower())
 
     def __init__(self, *choices, **kwargs):
+        self.value_transform = kwargs.pop('value_transform', None) or self.value_transform
+        super(AutoChoices, self).__init__(*choices, **kwargs)
 
-        value_transform = kwargs.pop('value_transform', None) or self.value_transform
+    def add_choices(self, *choices, **kwargs):
+        """Disallow super method to thing the first argument is a subset name"""
+        return super(AutoChoices, self).add_choices(_NO_SUBSET_NAME_, *choices, **kwargs)
+
+    def _convert_choices(self, choices):
+        """Auto create db values then call super method"""
 
         final_choices = []
         for choice in choices:
+
+            if isinstance(choice, ChoiceEntry):
+                final_choices.append(choice)
+                continue
+
             original_choice = choice
             if isinstance(choice, basestring):
+                if choice == _NO_SUBSET_NAME_:
+                    continue
                 choice = (choice, )
 
             assert 1 <= len(choice) <= 2, 'Invalid number of entries in %s' % (original_choice,)
@@ -973,10 +1016,10 @@ class AutoChoices(AutoDisplayChoices):
                         self.__class__.__name__, original_choice,)
 
             final_choice = list(choice)
-            final_choice.insert(1, value_transform(choice[0]))
+            final_choice.insert(1, self.value_transform(choice[0]))
             final_choices.append(final_choice)
 
-        super(AutoChoices, self).__init__(*final_choices, **kwargs)
+        return super(AutoChoices, self)._convert_choices(final_choices)
 
 
 def create_choice(klass, choices, subsets, kwargs):
