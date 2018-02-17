@@ -296,7 +296,7 @@ of the choice entry
     ...     ('EARTH', 'earth', 'Earth', {'color': 'blue'}),
     ...     ('MARS', 'mars', 'Mars', {'color': 'red'}),
     ... )
-    >>> PLANETS.EARTH.choice_entry.color
+    >>> PLANETS.EARTH.color
     'blue'
 
 
@@ -333,7 +333,7 @@ If you want to pass additional attributes, pass a tuple with the dict as a last 
     ... )
     >>> PLANETS.EARTH.value
     'earth'
-    >>> PLANETS.EARTH.choice_entry.color
+    >>> PLANETS.EARTH.color
     'blue'
 
 
@@ -433,7 +433,7 @@ If you want to pass additional attributes, pass a tuple with the dict as a last 
     1
     >>> PLANETS.EARTH.display
     'Earth'
-    >>> PLANETS.EARTH.choice_entry.color
+    >>> PLANETS.EARTH.color
     'blue'
 
 

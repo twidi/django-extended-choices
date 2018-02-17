@@ -719,6 +719,27 @@ class ChoicesTestCase(BaseTestCase):
         self.assertEqual(MY_CHOICES.B.value, 'bb')
         self.assertEqual(MY_CHOICES.B.display, 'bbb')
 
+    def test_accessing_attributes(self):
+        MY_CHOICES = Choices(
+            ('FOO', 1, 'foo', {'foo': 'foo1', 'bar': 'bar1'}),
+            ('BAR', 2, 'bar', {'foo': 'foo2', 'bar': 'bar2'}),
+        )
+        self.assertEqual(MY_CHOICES.FOO.choice_entry.foo, 'foo1')
+        self.assertEqual(MY_CHOICES.FOO.foo, 'foo1')
+        self.assertEqual(MY_CHOICES.FOO.constant.foo, 'foo1')
+        self.assertEqual(MY_CHOICES.FOO.value.foo, 'foo1')
+        self.assertEqual(MY_CHOICES.FOO.display.foo, 'foo1')
+        self.assertEqual(MY_CHOICES.FOO.choice_entry.bar, 'bar1')
+        self.assertEqual(MY_CHOICES.BAR.choice_entry.foo, 'foo2')
+        self.assertEqual(MY_CHOICES.BAR.foo, 'foo2')
+        self.assertEqual(MY_CHOICES.BAR.choice_entry.bar, 'bar2')
+        self.assertEqual(MY_CHOICES.BAR.bar, 'bar2')
+
+    def test_invalid_attributes(self):
+        for invalid_key in {'constant', 'value', 'display'}:
+            with self.assertRaises(AssertionError):
+                Choices(('FOO', '1', 'foo', {invalid_key: 'xxx'}))
+
 
 class ChoiceAttributeMixinTestCase(BaseTestCase):
     """Test the ``ChoiceAttributeMixin`` class."""
@@ -988,21 +1009,20 @@ class AutoDisplayChoicesTestCase(BaseTestCase):
 
         self.assertEqual(MY_CHOICES.A.value, 'aa')
         self.assertEqual(MY_CHOICES.A.display, 'aaa')
-        self.assertEqual(MY_CHOICES.A.choice_entry.foo, 'bara')
+        self.assertEqual(MY_CHOICES.A.foo, 'bara')
         self.assertEqual(MY_CHOICES.E.value, 'ee')
         self.assertEqual(MY_CHOICES.E.display, 'E')
         self.assertEqual(MY_CHOICES.F.value, 'ff')
         self.assertEqual(MY_CHOICES.F.display, 'F')
-        self.assertEqual(MY_CHOICES.F.choice_entry.foo, 'barf')
+        self.assertEqual(MY_CHOICES.F.foo, 'barf')
         self.assertEqual(MY_CHOICES.G.value, 'gg')
         self.assertEqual(MY_CHOICES.G.display, 'ggg')
         self.assertEqual(MY_CHOICES.H.value, 'hh')
         self.assertEqual(MY_CHOICES.H.display, 'hhh')
-        self.assertEqual(MY_CHOICES.H.choice_entry.foo, 'barh')
+        self.assertEqual(MY_CHOICES.H.foo, 'barh')
 
         MY_CHOICES.add_subset('ALL', ['A', 'E', 'F', 'G', 'H'])
         self.assertEqual(MY_CHOICES.ALL.constants, MY_CHOICES.constants)
-
 
 
 class AutoChoicesTestCase(BaseTestCase):
@@ -1087,29 +1107,29 @@ class AutoChoicesTestCase(BaseTestCase):
 
         self.assertEqual(MY_CHOICES.A.value, 'aa')
         self.assertEqual(MY_CHOICES.A.display, 'aaa')
-        self.assertEqual(MY_CHOICES.A.choice_entry.foo, 'bara')
+        self.assertEqual(MY_CHOICES.A.foo, 'bara')
         self.assertEqual(MY_CHOICES.B.value, 'b')
         self.assertEqual(MY_CHOICES.B.display, 'B')
         self.assertEqual(MY_CHOICES.C.value, 'c')
         self.assertEqual(MY_CHOICES.C.display, 'C')
         self.assertEqual(MY_CHOICES.D.value, 'd')
         self.assertEqual(MY_CHOICES.D.display, 'D')
-        self.assertEqual(MY_CHOICES.D.choice_entry.foo, 'bard')
+        self.assertEqual(MY_CHOICES.D.foo, 'bard')
         self.assertEqual(MY_CHOICES.E.value, 'ee')
         self.assertEqual(MY_CHOICES.E.display, 'E')
         self.assertEqual(MY_CHOICES.F.value, 'ff')
         self.assertEqual(MY_CHOICES.F.display, 'F')
-        self.assertEqual(MY_CHOICES.F.choice_entry.foo, 'barf')
+        self.assertEqual(MY_CHOICES.F.foo, 'barf')
         self.assertEqual(MY_CHOICES.G.value, 'gg')
         self.assertEqual(MY_CHOICES.G.display, 'ggg')
         self.assertEqual(MY_CHOICES.H.value, 'hh')
         self.assertEqual(MY_CHOICES.H.display, 'hhh')
-        self.assertEqual(MY_CHOICES.H.choice_entry.foo, 'barh')
+        self.assertEqual(MY_CHOICES.H.foo, 'barh')
         self.assertEqual(MY_CHOICES.I.value, 'i')
         self.assertEqual(MY_CHOICES.I.display, 'iii')
         self.assertEqual(MY_CHOICES.J.value, 'j')
         self.assertEqual(MY_CHOICES.J.display, 'jjj')
-        self.assertEqual(MY_CHOICES.J.choice_entry.foo, 'barj')
+        self.assertEqual(MY_CHOICES.J.foo, 'barj')
 
         MY_CHOICES.add_subset('ALL', ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'])
         self.assertEqual(MY_CHOICES.ALL.constants, MY_CHOICES.constants)
