@@ -278,10 +278,14 @@ class Choices(list):
                              "Problematic values: %s " % list(set(values_doubles)))
 
         # Check that none of the new values already exists.
-        bad_values = set(values).intersection(self.values)
-        if bad_values:
-            raise ValueError("You cannot add existing values. "
-                             "Existing values: %s." % list(bad_values))
+        try:
+            bad_values = set(values).intersection(self.values)
+        except TypeError:
+            raise ValueError("One value cannot be used in: %s" % list(values))
+        else:
+            if bad_values:
+                raise ValueError("You cannot add existing values. "
+                                 "Existing values: %s." % list(bad_values))
 
         # We can now add each choice.
         for choice_tuple in choices:
@@ -901,7 +905,7 @@ class AutoDisplayChoices(OrderedChoices):
     >>> ALIGNMENTS = AutoDisplayChoices(
     ...     ('BAD', 10),
     ...     ('NEUTRAL', 20),
-    ...     ('CHAOTIC_GOOD', 30),
+    ...     ('CHAOTIC_GOOD', 30, 'THE CHAOS'),
     ...     ('GOOD', 40, {'additional': 'attributes'}),
     ... )
 
@@ -910,7 +914,7 @@ class AutoDisplayChoices(OrderedChoices):
     >>> ALIGNMENTS.NEUTRAL.choice_entry
     ('NEUTRAL', 20, 'Neutral')
     >>> ALIGNMENTS.CHAOTIC_GOOD.display
-    'Chaotic good'
+    'THE CHAOS'
     >>> ALIGNMENTS.GOOD.choice_entry.additional
     'attributes'
 
@@ -932,17 +936,34 @@ class AutoDisplayChoices(OrderedChoices):
                 final_choices.append(choice)
                 continue
 
-            assert 2 <= len(choice) <= 3, 'Invalid number of entries in %s' % (choice,)
+            original_choice = choice
+            choice = list(choice)
+            length = len(choice)
 
-            if len(choice) == 3:
-                assert isinstance(choice[2], Mapping), 'Last argument must be a dict-like object in %s' % (choice,)
+            assert 2 <= length <= 4, 'Invalid number of entries in %s' % (original_choice,)
+
+            final_choice = []
+
+            # do we have attributes?
+            if length > 2 and isinstance(choice[-1], Mapping):
+                final_choice.append(choice.pop())
+            elif length == 4:
+                assert isinstance(choice[-1], Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
+                final_choice.append(choice.pop())
+
+            # the constant
+            final_choice.insert(0, choice.pop(0))
+
+            # the db value
+            final_choice.insert(1, choice.pop(0))
+
+            if len(choice):
+                # we were given a display value
+                final_choice.insert(2, choice.pop(0))
             else:
-                assert len(choice) == 2, \
-                    '%s accepts tuples with constant and value (and optional dict for additional attributes) in ' % (
-                        self.__class__.__name__, choice,)
+                # no display value, we compute it from the constant
+                final_choice.insert(2, self.display_transform(final_choice[0]))
 
-            final_choice = list(choice)
-            final_choice.insert(2, self.display_transform(choice[0]))
             final_choices.append(final_choice)
 
         return super(AutoDisplayChoices, self)._convert_choices(final_choices)
@@ -963,8 +984,8 @@ class AutoChoices(AutoDisplayChoices):
     >>> ALIGNMENTS = AutoChoices(
     ...     'BAD',
     ...     ('NEUTRAL', ),
-    ...     'CHAOTIC_GOOD',
-    ...     ('GOOD', {'additional': 'attributes'}),
+    ...     ('CHAOTIC_GOOD', 'chaos', 'THE CHAOS'),
+    ...     ('GOOD', None, 'Yeah', {'additional': 'attributes'}),
     ... )
 
     >>> ALIGNMENTS.BAD.value
@@ -973,8 +994,14 @@ class AutoChoices(AutoDisplayChoices):
     'Bad'
     >>> ALIGNMENTS.NEUTRAL.choice_entry
     ('NEUTRAL', 'neutral', 'Neutral')
-    >>> ALIGNMENTS.CHAOTIC_GOOD.choice_entry
-    ('CHAOTIC_GOOD', 'chaotic_good', 'Chaotic good')
+    >>> ALIGNMENTS.CHAOTIC_GOOD.value
+    'chaos'
+    >>> ALIGNMENTS.CHAOTIC_GOOD.display
+    'THE CHAOS'
+    >>> ALIGNMENTS.GOOD.value
+    'good'
+    >>> ALIGNMENTS.GOOD.display
+    'Yeah'
     >>> ALIGNMENTS.GOOD.choice_entry.additional
     'attributes'
 
@@ -1004,19 +1031,40 @@ class AutoChoices(AutoDisplayChoices):
             if isinstance(choice, basestring):
                 if choice == _NO_SUBSET_NAME_:
                     continue
-                choice = (choice, )
-
-            assert 1 <= len(choice) <= 2, 'Invalid number of entries in %s' % (original_choice,)
-
-            if len(choice) == 2:
-                assert isinstance(choice[1], Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
+                choice = [choice, ]
             else:
-                assert len(choice) == 1, \
-                    '%s accepts tuples with constant only (and optional dict for additional attributes) in ' % (
-                        self.__class__.__name__, original_choice,)
+                choice = list(choice)
 
-            final_choice = list(choice)
-            final_choice.insert(1, self.value_transform(choice[0]))
+            length = len(choice)
+
+            assert 1 <= length <= 4, 'Invalid number of entries in %s' % (original_choice,)
+
+            final_choice = []
+
+            # do we have attributes?
+            if length > 1 and isinstance(choice[-1], Mapping):
+                final_choice.append(choice.pop())
+            elif length == 4:
+                assert isinstance(choice[-1], Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
+                final_choice.append(choice.pop())
+
+            # the constant
+            final_choice.insert(0, choice.pop(0))
+
+            if len(choice):
+                # we were given a db value
+                final_choice.insert(1, choice.pop(0))
+                if len(choice):
+                    # we were given a display value
+                    final_choice.insert(2, choice.pop(0))
+            else:
+                # set None to compute it later
+                final_choice.insert(1, None)
+
+            if final_choice[1] is None:
+                # no db value, we compute it from the constant
+                final_choice[1] = self.value_transform(final_choice[0])
+
             final_choices.append(final_choice)
 
         return super(AutoChoices, self)._convert_choices(final_choices)

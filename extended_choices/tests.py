@@ -924,29 +924,6 @@ class AutoDisplayChoicesTestCase(BaseTestCase):
         self.assertEqual(MY_CHOICES.SIMPLE.display, 'Simple')
         self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
 
-    def test_invalid_tuples(self):
-        with self.assertRaises(AssertionError):
-            AutoDisplayChoices(
-                ('SIMPLE', ),
-            )
-        with self.assertRaises(AssertionError):
-            AutoDisplayChoices(
-                ('SIMPLE', 1, 'Simple'),
-            )
-        with self.assertRaises(AssertionError):
-            AutoDisplayChoices(
-                ('SIMPLE', 1, 'Simple', 'foo'),
-            )
-
-    def test_with_attributes(self):
-
-        MY_CHOICES = AutoDisplayChoices(
-            ('SIMPLE', 1),
-            ('NOT_SIMPLE', 2, {'additional': 'attributes'}),
-        )
-        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
-        self.assertEqual(MY_CHOICES.NOT_SIMPLE.choice_entry.additional, 'attributes')
-
     def test_pass_transform_function(self):
 
         MY_CHOICES = AutoDisplayChoices(
@@ -1000,6 +977,32 @@ class AutoDisplayChoicesTestCase(BaseTestCase):
         self.assertEqual(MY_CHOICES.B.value, 'bb')
         self.assertEqual(MY_CHOICES.B.display, 'B')
 
+    def test_passing_not_only_constant(self):
+        MY_CHOICES = AutoDisplayChoices(
+            ChoiceEntry(('A', 'aa', 'aaa', {'foo': 'bara'})),
+            ('E', 'ee'),
+            ('F', 'ff', {'foo': 'barf'}),
+            ('G', 'gg', 'ggg'),
+            ('H', 'hh', 'hhh', {'foo': 'barh'}),
+        )
+
+        self.assertEqual(MY_CHOICES.A.value, 'aa')
+        self.assertEqual(MY_CHOICES.A.display, 'aaa')
+        self.assertEqual(MY_CHOICES.A.choice_entry.foo, 'bara')
+        self.assertEqual(MY_CHOICES.E.value, 'ee')
+        self.assertEqual(MY_CHOICES.E.display, 'E')
+        self.assertEqual(MY_CHOICES.F.value, 'ff')
+        self.assertEqual(MY_CHOICES.F.display, 'F')
+        self.assertEqual(MY_CHOICES.F.choice_entry.foo, 'barf')
+        self.assertEqual(MY_CHOICES.G.value, 'gg')
+        self.assertEqual(MY_CHOICES.G.display, 'ggg')
+        self.assertEqual(MY_CHOICES.H.value, 'hh')
+        self.assertEqual(MY_CHOICES.H.display, 'hhh')
+        self.assertEqual(MY_CHOICES.H.choice_entry.foo, 'barh')
+
+        MY_CHOICES.add_subset('ALL', ['A', 'E', 'F', 'G', 'H'])
+        self.assertEqual(MY_CHOICES.ALL.constants, MY_CHOICES.constants)
+
 
 
 class AutoChoicesTestCase(BaseTestCase):
@@ -1015,26 +1018,6 @@ class AutoChoicesTestCase(BaseTestCase):
         self.assertEqual(MY_CHOICES.SIMPLE.value, 'simple')
         self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
         self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'not_simple')
-
-    def test_invalid_tuples(self):
-        with self.assertRaises(AssertionError):
-            AutoChoices(
-                ('SIMPLE', 1),
-            )
-        with self.assertRaises(AssertionError):
-            AutoChoices(
-                ('SIMPLE', 1, 'Simple'),
-            )
-
-    def test_with_attributes(self):
-
-        MY_CHOICES = AutoChoices(
-            'SIMPLE',
-            ('NOT_SIMPLE', {'additional': 'attributes'}),
-        )
-        self.assertEqual(MY_CHOICES.NOT_SIMPLE.display, 'Not simple')
-        self.assertEqual(MY_CHOICES.NOT_SIMPLE.value, 'not_simple')
-        self.assertEqual(MY_CHOICES.NOT_SIMPLE.choice_entry.additional, 'attributes')
 
     def test_pass_transform_functions(self):
 
@@ -1088,15 +1071,48 @@ class AutoChoicesTestCase(BaseTestCase):
             'B': MY_CHOICES.B.choice_entry,
         })
 
-    def test_passing_choice_entry(self):
+    def test_passing_not_only_constant(self):
         MY_CHOICES = AutoChoices(
-            ChoiceEntry(('A', 'aa', 'aaa', {'foo': 'bar'})),
+            ChoiceEntry(('A', 'aa', 'aaa', {'foo': 'bara'})),
             'B',
+            ('C', ),
+            ('D', {'foo': 'bard'}),
+            ('E', 'ee'),
+            ('F', 'ff', {'foo': 'barf'}),
+            ('G', 'gg', 'ggg'),
+            ('H', 'hh', 'hhh', {'foo': 'barh'}),
+            ('I', None, 'iii'),
+            ('J', None, 'jjj', {'foo': 'barj'}),
         )
+
         self.assertEqual(MY_CHOICES.A.value, 'aa')
         self.assertEqual(MY_CHOICES.A.display, 'aaa')
+        self.assertEqual(MY_CHOICES.A.choice_entry.foo, 'bara')
         self.assertEqual(MY_CHOICES.B.value, 'b')
         self.assertEqual(MY_CHOICES.B.display, 'B')
+        self.assertEqual(MY_CHOICES.C.value, 'c')
+        self.assertEqual(MY_CHOICES.C.display, 'C')
+        self.assertEqual(MY_CHOICES.D.value, 'd')
+        self.assertEqual(MY_CHOICES.D.display, 'D')
+        self.assertEqual(MY_CHOICES.D.choice_entry.foo, 'bard')
+        self.assertEqual(MY_CHOICES.E.value, 'ee')
+        self.assertEqual(MY_CHOICES.E.display, 'E')
+        self.assertEqual(MY_CHOICES.F.value, 'ff')
+        self.assertEqual(MY_CHOICES.F.display, 'F')
+        self.assertEqual(MY_CHOICES.F.choice_entry.foo, 'barf')
+        self.assertEqual(MY_CHOICES.G.value, 'gg')
+        self.assertEqual(MY_CHOICES.G.display, 'ggg')
+        self.assertEqual(MY_CHOICES.H.value, 'hh')
+        self.assertEqual(MY_CHOICES.H.display, 'hhh')
+        self.assertEqual(MY_CHOICES.H.choice_entry.foo, 'barh')
+        self.assertEqual(MY_CHOICES.I.value, 'i')
+        self.assertEqual(MY_CHOICES.I.display, 'iii')
+        self.assertEqual(MY_CHOICES.J.value, 'j')
+        self.assertEqual(MY_CHOICES.J.display, 'jjj')
+        self.assertEqual(MY_CHOICES.J.choice_entry.foo, 'barj')
+
+        MY_CHOICES.add_subset('ALL', ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'])
+        self.assertEqual(MY_CHOICES.ALL.constants, MY_CHOICES.constants)
 
 
 if __name__ == "__main__":
