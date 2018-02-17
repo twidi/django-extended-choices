@@ -296,7 +296,7 @@ of the choice entry
     ...     ('EARTH', 'earth', 'Earth', {'color': 'blue'}),
     ...     ('MARS', 'mars', 'Mars', {'color': 'red'}),
     ... )
-    >>> PLANETS.EARTH.choice_entry.color
+    >>> PLANETS.EARTH.color
     'blue'
 
 
@@ -333,7 +333,7 @@ If you want to pass additional attributes, pass a tuple with the dict as a last 
     ... )
     >>> PLANETS.EARTH.value
     'earth'
-    >>> PLANETS.EARTH.choice_entry.color
+    >>> PLANETS.EARTH.color
     'blue'
 
 
@@ -369,6 +369,40 @@ If you find yourself repeting these transform functions you can have a base clas
 
 Of course you can still override the functions by passing them to the constructor.
 
+If you want, for an entry, force a specific value, you can do it by simply passing it as a second argument:
+
+    >>> PLANETS = AutoChoices(
+    ...     'EARTH',
+    ...     ('MARS', 'red-planet'),
+    ... )
+    >>> PLANETS.MARS.value
+    'red-planet'
+
+And then if you want to set the display, pass a third one:
+
+    >>> PLANETS = AutoChoices(
+    ...     'EARTH',
+    ...     ('MARS', 'red-planet', 'Red planet'),
+    ... )
+    >>> PLANETS.MARS.value
+    'red-planet'
+    >>> PLANETS.MARS.display
+    'Red planet'
+
+
+To force a display value but let the db value to be automatically computed, use ``None`` for the second argument:
+
+
+    >>> PLANETS = AutoChoices(
+    ...     'EARTH',
+    ...     ('MARS', None, 'Red planet'),
+    ... )
+    >>> PLANETS.MARS.value
+    'mars'
+    >>> PLANETS.MARS.display
+    'Red planet'
+
+
 AutoDisplayChoices
 ''''''''''''''''''
 
@@ -399,12 +433,21 @@ If you want to pass additional attributes, pass a tuple with the dict as a last 
     1
     >>> PLANETS.EARTH.display
     'Earth'
-    >>> PLANETS.EARTH.choice_entry.color
+    >>> PLANETS.EARTH.color
     'blue'
 
 
 As in ``AutoChoices``, you can change the transform function for the value to display by passing ``display_transform`` to the
 constructor.
+
+If you want, for an entry, force a specific display, you can do it by simply passing it as a third argument:
+
+    >>> PLANETS = AutoChoices(
+    ...     ('EARTH', 1),
+    ...     ('MARS', 2, 'Red planet'),
+    ... )
+    >>> PLANETS.MARS.display
+    'Red planet'
 
 Notes
 -----
