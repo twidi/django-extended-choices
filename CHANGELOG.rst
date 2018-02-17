@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Release *v1.3* - ``2018-02-17``
+-------------------------------
+* correct inability fo ``Auto*Choices`` be able to have subsets
+* `Auto*Choices` can accept entries with forced value/display
+* additional attributes are now correctly (un)pickled
+* additional attributes are now also accessible from constant/value/display
+
 Release *v1.2* - ``2018-02-01``
 -------------------------------
 * add ``AutoChoices`` and ``AutoDisplayChoices``
