@@ -51,7 +51,7 @@ class BaseTestCase(unittest.TestCase):
     def init_choices(self):
 
         self.MY_CHOICES = Choices(
-            ('ONE', 1, 'One for the money'),
+            ('ONE', 1, 'One for the money', {'one': 'money'}),
             ('TWO', 2, 'Two for the show'),
             ('THREE', 3, 'Three to get ready'),
         )
@@ -587,6 +587,8 @@ class ChoicesTestCase(BaseTestCase):
         self.assertEqual(unpickled_value.constant, 'ONE')
         self.assertEqual(unpickled_value.display, 'One for the money')
         self.assertEqual(unpickled_value.value, 1)
+        self.assertEqual(unpickled_value.one, 'money')
+        self.assertEqual(unpickled_value.display.one, 'money')
 
     def test_pickle_choice_entry(self):
         """Test that a choice entry could be pickled and unpickled."""
@@ -600,6 +602,8 @@ class ChoicesTestCase(BaseTestCase):
         self.assertEqual(unpickled_entry.constant, 'ONE')
         self.assertEqual(unpickled_entry.display, 'One for the money')
         self.assertEqual(unpickled_entry.value, 1)
+        self.assertEqual(unpickled_entry.one, 'money')
+        self.assertEqual(unpickled_entry.display.one, 'money')
 
     def test_pickle_choice(self):
         """Test that a choices object could be pickled and unpickled."""
@@ -609,6 +613,8 @@ class ChoicesTestCase(BaseTestCase):
         unpickled_choices = pickle.loads(pickled_choices)
 
         self.assertEqual(unpickled_choices, self.MY_CHOICES)
+        self.assertEqual(unpickled_choices.ONE.one, 'money')
+        self.assertEqual(unpickled_choices.ONE.display.one, 'money')
 
         # With a name, extra arguments and subsets
         OTHER_CHOICES = Choices(

@@ -278,10 +278,11 @@ class ChoiceEntry(tuple):
 
         attributes = None
         if len(tuple_) == 4:
-            assert isinstance(tuple_[3], Mapping), 'Last argument must be a dict-like object in %s' % (tuple_,)
-            for invalid_key in {'constant', 'value', 'display'}:
-                assert invalid_key not in tuple_[3], 'Additional attributes cannot contain one named "%s" in %s' % (invalid_key, tuple_,)
             attributes = tuple_[3]
+            assert attributes is None or isinstance(attributes, Mapping), 'Last argument must be a dict-like object in %s' % (tuple_,)
+            if attributes:
+                for invalid_key in {'constant', 'value', 'display'}:
+                    assert invalid_key not in attributes, 'Additional attributes cannot contain one named "%s" in %s' % (invalid_key, tuple_,)
 
         # Call the ``tuple`` constructor with only the real tuple entries.
         obj = super(ChoiceEntry, cls).__new__(cls, tuple_[:3])
@@ -327,3 +328,29 @@ class ChoiceEntry(tuple):
                              'use an empty string.')
 
         return create_choice_attribute(self.ChoiceAttributeMixin, value, self)
+
+    def __reduce__(self):
+        """Reducer to pass attributes when pickling.
+
+        Returns
+        -------
+        tuple
+            A tuple as expected by pickle, to recreate the object when calling ``pickle.loads``:
+            1. a callable to recreate the object
+            2. a tuple with all positioned arguments expected by this callable
+
+        """
+
+        return (
+            # The ``ChoiceEntry`` class, or a subclass, used to create the current instance
+            self.__class__,
+            # The original values of the tuple, and attributes (we pass a tuple as single argument)
+            (
+                (
+                    self.constant.original_value,
+                    self.value.original_value,
+                    self.display.original_value,
+                    self.attributes
+                ),
+            )
+        )

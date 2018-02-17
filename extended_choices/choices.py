@@ -832,6 +832,7 @@ class Choices(list):
                         entry.constant.original_value,
                         entry.value.original_value,
                         entry.display.original_value,
+                        entry.attributes,
                     )
                     for entry in self.entries
                 ],
@@ -948,8 +949,10 @@ class AutoDisplayChoices(OrderedChoices):
             if length > 2 and isinstance(choice[-1], Mapping):
                 final_choice.append(choice.pop())
             elif length == 4:
-                assert isinstance(choice[-1], Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
-                final_choice.append(choice.pop())
+                attributes = choice.pop()
+                assert attributes is None or isinstance(attributes, Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
+                if attributes:
+                    final_choice.append(attributes)
 
             # the constant
             final_choice.insert(0, choice.pop(0))
@@ -1045,8 +1048,10 @@ class AutoChoices(AutoDisplayChoices):
             if length > 1 and isinstance(choice[-1], Mapping):
                 final_choice.append(choice.pop())
             elif length == 4:
-                assert isinstance(choice[-1], Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
-                final_choice.append(choice.pop())
+                attributes = choice.pop()
+                assert attributes is None or isinstance(attributes, Mapping), 'Last argument must be a dict-like object in %s' % (original_choice,)
+                if attributes:
+                    final_choice.append(attributes)
 
             # the constant
             final_choice.insert(0, choice.pop(0))
