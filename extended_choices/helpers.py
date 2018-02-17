@@ -114,6 +114,9 @@ class ChoiceAttributeMixin(object):
 
         self.original_value = value
         self.choice_entry = choice_entry
+        if self.choice_entry.attributes:
+            for key, value in self.choice_entry.attributes.items():
+                setattr(self, key, value)
 
     @property
     def constant(self):
@@ -273,11 +276,20 @@ class ChoiceEntry(tuple):
         # Ensure we have exactly 3 entries in the tuple and an optional dict.
         assert 3 <= len(tuple_) <= 4, 'Invalid number of entries in %s' % (tuple_,)
 
+        attributes = None
+        if len(tuple_) == 4:
+            attributes = tuple_[3]
+            assert attributes is None or isinstance(attributes, Mapping), 'Last argument must be a dict-like object in %s' % (tuple_,)
+            if attributes:
+                for invalid_key in {'constant', 'value', 'display'}:
+                    assert invalid_key not in attributes, 'Additional attributes cannot contain one named "%s" in %s' % (invalid_key, tuple_,)
+
         # Call the ``tuple`` constructor with only the real tuple entries.
         obj = super(ChoiceEntry, cls).__new__(cls, tuple_[:3])
 
         # Save all special attributes.
         # pylint: disable=protected-access
+        obj.attributes = attributes
         obj.constant = obj._get_choice_attribute(tuple_[0])
         obj.value = obj._get_choice_attribute(tuple_[1])
         obj.display = obj._get_choice_attribute(tuple_[2])
@@ -286,9 +298,8 @@ class ChoiceEntry(tuple):
         obj.choice = (obj.value, obj.display)
 
         # Add additional attributes.
-        if len(tuple_) == 4:
-            assert isinstance(tuple_[3], Mapping), 'Last argument must be a dict-like object in %s' % (tuple_,)
-            for key, value in tuple_[3].items():
+        if attributes:
+            for key, value in attributes.items():
                 setattr(obj, key, value)
 
         return obj
@@ -317,3 +328,29 @@ class ChoiceEntry(tuple):
                              'use an empty string.')
 
         return create_choice_attribute(self.ChoiceAttributeMixin, value, self)
+
+    def __reduce__(self):
+        """Reducer to pass attributes when pickling.
+
+        Returns
+        -------
+        tuple
+            A tuple as expected by pickle, to recreate the object when calling ``pickle.loads``:
+            1. a callable to recreate the object
+            2. a tuple with all positioned arguments expected by this callable
+
+        """
+
+        return (
+            # The ``ChoiceEntry`` class, or a subclass, used to create the current instance
+            self.__class__,
+            # The original values of the tuple, and attributes (we pass a tuple as single argument)
+            (
+                (
+                    self.constant.original_value,
+                    self.value.original_value,
+                    self.display.original_value,
+                    self.attributes
+                ),
+            )
+        )
