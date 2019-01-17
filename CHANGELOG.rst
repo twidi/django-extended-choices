@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Release *v1.3.1* - ``2019-01-17``
+---------------------------------
+* officiel support for Python 3.7 and Django 2.1
+
 Release *v1.3* - ``2018-02-17``
 -------------------------------
 * correct inability fo ``Auto*Choices`` be able to have subsets
