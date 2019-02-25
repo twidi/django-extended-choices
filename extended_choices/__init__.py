@@ -1,7 +1,7 @@
 """Little helper application to improve django choices (for fields)"""
-
+from __future__ import unicode_literals
 import pkg_resources
-from future.builtins import str
+import six
 from os import path
 from setuptools.config import read_configuration
 
@@ -22,5 +22,5 @@ def _extract_version(package_name):
     return version
 
 
-EXACT_VERSION = _extract_version('django_extended_choices')
-VERSION = tuple(int(part) for part in EXACT_VERSION.split('.') if str(part).isnumeric())
+EXACT_VERSION = six.text_type(_extract_version('django_extended_choices'))
+VERSION = tuple(int(part) for part in EXACT_VERSION.split('.') if part.isnumeric())

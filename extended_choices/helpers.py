@@ -11,7 +11,6 @@ The documentation format in this file is numpydoc_.
 
 from __future__ import unicode_literals
 
-from builtins import object  # pylint: disable=redefined-builtin
 try:
     from collections.abc import Mapping
 except ImportError:
