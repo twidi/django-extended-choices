@@ -244,6 +244,13 @@ If you want to check membership in a subset you could do:
         # it's an example, we could have just tested with STATES.ONLINE
         return self.state not in STATES.NOT_ONLINE
 
+
+If you want to filter a queryset on values from a subset, you can use ``values``, but as ``values`` is a dict, ``keys()`` must be user:
+
+.. code-block:: python
+
+    Content.objects.filter(state__in=STATES.NOT_ONLINE.values.keys())
+
 You can add choice entries in many steps using ``add_choices``, possibly creating subsets at
 the same time.
 
