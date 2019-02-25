@@ -9,3 +9,5 @@ dist/
 *egg-info
 # pycharm project directory
 .idea
+.coverage
+.tox
