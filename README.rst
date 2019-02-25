@@ -165,6 +165,7 @@ choice entry as values:
     >>> STATES.displays['Offline'] is STATES.for_display('Offline')
     True
 
+
 If you want these dicts to be ordered, you can pass the dict class to use to the
 ``Choices`` constructor:
 
@@ -371,6 +372,8 @@ Of course you can still override the functions by passing them to the constructo
 
 If you want, for an entry, force a specific value, you can do it by simply passing it as a second argument:
 
+.. code-block:: python
+
     >>> PLANETS = AutoChoices(
     ...     'EARTH',
     ...     ('MARS', 'red-planet'),
@@ -379,6 +382,8 @@ If you want, for an entry, force a specific value, you can do it by simply passi
     'red-planet'
 
 And then if you want to set the display, pass a third one:
+
+.. code-block:: python
 
     >>> PLANETS = AutoChoices(
     ...     'EARTH',
@@ -392,6 +397,7 @@ And then if you want to set the display, pass a third one:
 
 To force a display value but let the db value to be automatically computed, use ``None`` for the second argument:
 
+.. code-block:: python
 
     >>> PLANETS = AutoChoices(
     ...     'EARTH',
@@ -441,6 +447,8 @@ As in ``AutoChoices``, you can change the transform function for the value to di
 constructor.
 
 If you want, for an entry, force a specific display, you can do it by simply passing it as a third argument:
+
+.. code-block:: python
 
     >>> PLANETS = AutoChoices(
     ...     ('EARTH', 1),
