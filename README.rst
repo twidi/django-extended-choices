@@ -134,7 +134,7 @@ You can even iterate on a ``Choices`` objects to get choices as seen by Django:
     >>> for choice in STATES:
     ...     print(choice)
     (1, 'Online')
-    (2, 'Draf')
+    (2, 'Draft')
     (3, 'Offline')
 
 To get all choice entries as given to the ``Choices`` object, you can use the ``entries``
@@ -165,6 +165,7 @@ choice entry as values:
     >>> STATES.displays['Offline'] is STATES.for_display('Offline')
     True
 
+
 If you want these dicts to be ordered, you can pass the dict class to use to the
 ``Choices`` constructor:
 
@@ -178,7 +179,7 @@ If you want these dicts to be ordered, you can pass the dict class to use to the
         dict_class = OrderedDict
     )
 
-Since version ``1.1``, the new ``OrderedChoices``class is provided, that is exactly that:
+Since version ``1.1``, the new ``OrderedChoices`` class is provided, that is exactly that:
 a ``Choices`` using ``OrderedDict`` by default for ``dict_class``. You can directly import
 it from ``extended_choices``.
 
@@ -225,7 +226,7 @@ As the subset is a real ``Choices`` instance, you have the same attributes and m
     ...
     KeyError: 3
     >>> list(STATES.NOT_ONLINE.constants.keys())
-    ['DRAFT', 'OFFLINE]
+    ['DRAFT', 'OFFLINE']
     >>> STATES.NOT_ONLINE.has_display('Online')
     False
 
@@ -241,7 +242,14 @@ If you want to check membership in a subset you could do:
 
     def is_online(self):
         # it's an example, we could have just tested with STATES.ONLINE
-        return self.state not in STATES.NOT_ONLINE_DICT
+        return self.state not in STATES.NOT_ONLINE
+
+
+If you want to filter a queryset on values from a subset, you can use ``values``, but as ``values`` is a dict, ``keys()`` must be user:
+
+.. code-block:: python
+
+    Content.objects.filter(state__in=STATES.NOT_ONLINE.values.keys())
 
 You can add choice entries in many steps using ``add_choices``, possibly creating subsets at
 the same time.
@@ -252,7 +260,7 @@ To construct the same ``Choices`` as before, we could have done:
 
     STATES = Choices()
     STATES.add_choices(
-        ('ONLINE', 1, 'Online)
+        ('ONLINE', 1, 'Online')
     )
     STATES.add_choices(
         ('DRAFT',   2, 'Draft'),
@@ -371,6 +379,8 @@ Of course you can still override the functions by passing them to the constructo
 
 If you want, for an entry, force a specific value, you can do it by simply passing it as a second argument:
 
+.. code-block:: python
+
     >>> PLANETS = AutoChoices(
     ...     'EARTH',
     ...     ('MARS', 'red-planet'),
@@ -379,6 +389,8 @@ If you want, for an entry, force a specific value, you can do it by simply passi
     'red-planet'
 
 And then if you want to set the display, pass a third one:
+
+.. code-block:: python
 
     >>> PLANETS = AutoChoices(
     ...     'EARTH',
@@ -392,6 +404,7 @@ And then if you want to set the display, pass a third one:
 
 To force a display value but let the db value to be automatically computed, use ``None`` for the second argument:
 
+.. code-block:: python
 
     >>> PLANETS = AutoChoices(
     ...     'EARTH',
@@ -441,6 +454,8 @@ As in ``AutoChoices``, you can change the transform function for the value to di
 constructor.
 
 If you want, for an entry, force a specific display, you can do it by simply passing it as a third argument:
+
+.. code-block:: python
 
     >>> PLANETS = AutoChoices(
     ...     ('EARTH', 1),

@@ -59,7 +59,7 @@ The documentation format in this file is numpydoc_.
 """
 
 from __future__ import unicode_literals
-from past.builtins import basestring
+import six
 
 from collections import OrderedDict
 try:
@@ -374,7 +374,7 @@ class Choices(list):
 
         # Check for an optional subset name as the first argument (so the first entry of *choices).
         subset_name = None
-        if choices and isinstance(choices[0], basestring) and choices[0] != _NO_SUBSET_NAME_:
+        if choices and isinstance(choices[0], six.string_types) and choices[0] != _NO_SUBSET_NAME_:
             subset_name = choices[0]
             choices = choices[1:]
 
@@ -1031,7 +1031,7 @@ class AutoChoices(AutoDisplayChoices):
                 continue
 
             original_choice = choice
-            if isinstance(choice, basestring):
+            if isinstance(choice, six.string_types):
                 if choice == _NO_SUBSET_NAME_:
                     continue
                 choice = [choice, ]

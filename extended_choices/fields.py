@@ -11,7 +11,7 @@ The documentation format in this file is `numpydoc`_.
 
 from __future__ import unicode_literals
 
-from past.builtins import basestring
+import six
 
 from django import forms
 
@@ -42,7 +42,7 @@ class NamedExtendedChoiceFormField(forms.Field):
             return None
 
         # Validate the type.
-        if not isinstance(value, basestring):
+        if not isinstance(value, six.string_types):
             raise forms.ValidationError(
                 "Invalid value type (should be a string).",
                 code='invalid-choice-type',
