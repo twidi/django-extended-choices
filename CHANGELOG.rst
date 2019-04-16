@@ -1,13 +1,17 @@
 Changelog
 =========
 
+Release *v1.3.3* - ``2019-04-16``
+---------------------------------
+* official support for Django 2.2
+
 Release *v1.3.2* - ``2019-02-25``
 ---------------------------------
 * replace ``future`` dependency by ``six``
 
 Release *v1.3.1* - ``2019-01-17``
 ---------------------------------
-* officiel support for Python 3.7 and Django 2.1
+* official support for Python 3.7 and Django 2.1
 
 Release *v1.3* - ``2018-02-17``
 -------------------------------
