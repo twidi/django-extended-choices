@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Release *v1.3.3* - ``unreleased``
+Release *v1.3.3* - ``2019-04-16``
 ---------------------------------
 * official support for Django 2.2
 
